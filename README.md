@@ -7,7 +7,7 @@ Repositorio central (documentación) del proyecto Cajusa.
 - Backend: [(link a Cajusa-backend)](https://github.com/santiagods04/Cajusa-backend)
 
 ## Trello
-- Tablero: [(link a tu tablero)](https://trello.com/b/U6r8KKqE/triple-ten-proyecto-final)
+- Tablero: [(link al tablero)](https://trello.com/b/U6r8KKqE/triple-ten-proyecto-final)
 
 ## Deploy (cuando exista)
 - Frontend: (URL)
