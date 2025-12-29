@@ -1,0 +1,17 @@
+/* home.css */
+
+.home__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.home__featured {
+  margin-top: 24px;
+}
+
+.home__featured-title {
+  margin: 0 0 10px;
+  font-size: 20px;
+}

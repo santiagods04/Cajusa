@@ -1,0 +1,22 @@
+/* header.css */
+
+.header {
+  border-bottom: var(--border);
+}
+
+.header__inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header__brand {
+  margin: 0;
+  font-size: 20px;
+}
+
+.header__nav {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+}
