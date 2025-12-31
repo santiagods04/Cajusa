@@ -1,5 +1,3 @@
-/* product-detail.css */
-
 .product__back {
   display: inline-block;
   margin-bottom: 10px;
@@ -23,3 +21,8 @@
   border: var(--border);
   background: transparent;
 }
+
+.product__cta {
+  margin-top: 16px;
+}
+

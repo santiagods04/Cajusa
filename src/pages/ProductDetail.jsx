@@ -1,6 +1,8 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { getProductById } from "../services/productsService";
+import { openWhatsApp } from "../utils/whatsapp";
+
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -31,6 +33,34 @@ export default function ProductDetail() {
 
   if (error) return <div className="state container">Error: {error}</div>;
   if (!product) return <div className="state container">Cargando…</div>;
+
+  //Logica whatsapp
+  const needsVariant = Array.isArray(product?.variants) && product.variants.length > 0;
+  const canBuy = !needsVariant || (size && color);
+  const lineLabel = product?.line === "antifluido" ? "Antifluido" : "Lino";
+
+  const SPARK = "\u2728";
+  const OK = "\u2705"; 
+
+  const waText =
+    `Hola! ${SPARK} Me interesa este producto:\n\n` +
+    `• Producto: ${product?.name}\n` +
+    `• Línea: ${lineLabel}\n` +
+    `• Categoría: ${product?.category}\n` +
+    `• Talla: ${size || "—"}\n` +
+    `• Color: ${color || "—"}\n\n` +
+    `¿Me confirmas disponibilidad y tiempo de entrega? Gracias ${OK}`
+    ;
+  console.log("waText RAW =>", waText);
+  console.log("waText encoded =>", encodeURIComponent(waText));
+  
+  function handleWhatsApp() {
+    if (!canBuy) {
+      alert("Selecciona talla y color para enviar el mensaje por WhatsApp.");
+      return;
+    }
+    openWhatsApp(waText);
+  }
 
   return (
     <div className="container">
@@ -73,6 +103,12 @@ export default function ProductDetail() {
             ))}
           </select>
         </label>
+      </div>
+
+      <div className="product__cta">
+        <button className="btn btn--active" type="button" onClick={handleWhatsApp}>
+          Comprar por WhatsApp
+        </button>
       </div>
 
       <p style={{ marginTop: 12 }}>
