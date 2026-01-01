@@ -1,4 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
+import logo from "../assets/logo-cajusa-black.png";
 
 export default function Header() {
   const getNavStyle = ({ isActive }) => ({
@@ -9,7 +10,9 @@ export default function Header() {
     <header className="header">
       <div className="container header__inner">
         <Link to="/" className="link">
-          <h2 className="header__brand">Cajusa</h2>
+          <div className="header__brand">
+            <img className="header__logo" src={logo} alt="Cajusa Boutique" />
+          </div>
         </Link>
 
         <nav className="header__nav">
