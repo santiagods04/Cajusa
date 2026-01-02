@@ -51,8 +51,8 @@ export default function ProductDetail() {
     `• Color: ${color || "—"}\n\n` +
     `¿Me confirmas disponibilidad y tiempo de entrega? Gracias ${OK}`
     ;
-  console.log("waText RAW =>", waText);
-  console.log("waText encoded =>", encodeURIComponent(waText));
+  // console.log("waText RAW =>", waText);
+  // console.log("waText encoded =>", encodeURIComponent(waText));
   
   function handleWhatsApp() {
     if (!canBuy) {
