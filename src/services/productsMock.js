@@ -9,7 +9,7 @@ export const productsMock = [
     price: 135000,
     description:
       "Uniforme en tela antifluido Lafayette. Cómodo, resistente y pensado para jornadas largas.",
-    images: ["/img/uf-enf-001-1.jpg", "/img/uf-enf-001-2.jpg"],
+    images: ["/img/Modelo1.png", "/img/Modelo1.png"],
     variants: [
       { size: "S", color: "Azul", available: true },
       { size: "M", color: "Azul", available: true },
@@ -27,7 +27,7 @@ export const productsMock = [
     price: 125000,
     description:
       "Filipina profesional en antifluido Lafayette. Excelente presentación y fácil cuidado.",
-    images: ["/img/uf-den-001-1.jpg"],
+    images: ["/img/Modelo1.png"],
     variants: [
       { size: "S", color: "Negro", available: true },
       { size: "M", color: "Negro", available: true },
@@ -45,7 +45,7 @@ export const productsMock = [
     price: 145000,
     description:
       "Bata antifluido Lafayette para trabajo veterinario. Protección y comodidad.",
-    images: ["/img/uf-vet-001-1.jpg"],
+    images: ["/img/Modelo1.png"],
     variants: [
       { size: "S", color: "Verde", available: true },
       { size: "M", color: "Verde", available: true },
@@ -64,7 +64,7 @@ export const productsMock = [
     price: 160000,
     description:
       "Tela natural transpirable con propuesta artesanal. Fresca, suave y elegante.",
-    images: ["/img/ln-blu-001-1.jpg", "/img/ln-blu-001-2.jpg"],
+    images: ["/img/Modelo1.png", "/img/Modelo1.png"],
     variants: [
       { size: "S", color: "Natural", available: true },
       { size: "M", color: "Natural", available: true },
@@ -82,7 +82,7 @@ export const productsMock = [
     price: 190000,
     description:
       "Pantalón en lino natural, transpirable y cómodo. Corte recto de uso diario.",
-    images: ["/img/ln-pan-001-1.jpg"],
+    images: ["/img/Modelo1.png"],
     variants: [
       { size: "S", color: "Natural", available: true },
       { size: "M", color: "Natural", available: true },
@@ -99,7 +99,7 @@ export const productsMock = [
     price: 175000,
     description:
       "Falda fresca en lino natural con acabado artesanal. Ideal para climas cálidos.",
-    images: ["/img/ln-fal-001-1.jpg"],
+    images: ["/img/Modelo1.png"],
     variants: [
       { size: "S", color: "Beige", available: true },
       { size: "M", color: "Beige", available: true },
