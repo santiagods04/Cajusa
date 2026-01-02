@@ -194,23 +194,17 @@
   position: relative;
 }
 
-.home__rail {
+.home__rail{
   display: flex;
   gap: 14px;
-  padding: 6px 44px 10px; /* espacio para flechas */
-  scroll-snap-type: x mandatory;
+  overflow: hidden;          /* sin scroll manual */
+  overflow-y: hidden;
+  padding: 6px 44px 10px;    /* espacio para flechas */
   scroll-behavior: smooth;
+  scrollbar-width: none;
+  scroll-snap-type: none;    /* evita saltos raros */
   overscroll-behavior-x: contain;
-
-  /* 🔒 sin scroll manual (pero el JS puede moverlo) */
-  overflow-x: hidden;
-
-  /* 🔇 scrollbar fuera */
-  scrollbar-width: none;       /* Firefox */
-  -ms-overflow-style: none;    /* Edge viejo */
-
-  /* 📱 evita swipe horizontal en móvil */
-  touch-action: pan-y;
+  -ms-overflow-style: none;
 }
 
 /* scrollbar discreta */

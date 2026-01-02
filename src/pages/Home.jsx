@@ -32,6 +32,9 @@ export default function Home() {
   };
 
   const railRef = useRef(null);
+  const carouselRef = useRef(null);
+  const rafRef = useRef(0);
+  const pausedRef = useRef(false);
 
   const loopedFeatured = useMemo(() => {
     if (!featured.length) return [];
@@ -75,20 +78,43 @@ export default function Home() {
 
   useEffect(() => {
     const el = railRef.current;
-    if (!el) return;
+    const hoverEl = carouselRef.current;
+    if (!el || !hoverEl || !featured.length) return;
 
-    const onScroll = () => normalize(el);
-    el.addEventListener("scroll", onScroll, { passive: true });
+    const SPEED = 22; // px/seg (suave). Prueba 18–35.
+    let last = 0;
 
-    // Quita scroll horizontal manual (trackpad/rueda), deja el vertical normal
-    const onWheel = (e) => {
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) e.preventDefault();
+    const tick = (t) => {
+      if (!last) last = t;
+      const dt = t - last;
+      last = t;
+
+      if (!pausedRef.current) {
+        el.scrollLeft += (dt / 1000) * SPEED;
+      }
+
+      normalize(el);
+      rafRef.current = requestAnimationFrame(tick);
     };
-    el.addEventListener("wheel", onWheel, { passive: false });
+
+    rafRef.current = requestAnimationFrame(tick);
+
+    const pause = () => { pausedRef.current = true; };
+    const resume = () => { pausedRef.current = false; };
+
+    hoverEl.addEventListener("mouseenter", pause);
+    hoverEl.addEventListener("mouseleave", resume);
+
+    // extra pro: si alguien tab-navega, también pausa
+    hoverEl.addEventListener("focusin", pause);
+    hoverEl.addEventListener("focusout", resume);
 
     return () => {
-      el.removeEventListener("scroll", onScroll);
-      el.removeEventListener("wheel", onWheel);
+      cancelAnimationFrame(rafRef.current);
+      hoverEl.removeEventListener("mouseenter", pause);
+      hoverEl.removeEventListener("mouseleave", resume);
+      hoverEl.removeEventListener("focusin", pause);
+      hoverEl.removeEventListener("focusout", resume);
     };
   }, [featured.length]);
 
@@ -96,12 +122,18 @@ export default function Home() {
     const el = railRef.current;
     if (!el) return;
 
-    const step = Math.round(el.clientWidth * 0.85);
+    const card = el.querySelector(".home__mini-card");
+    const gap = 14; // debe coincidir con tu CSS
+    const step = card
+      ? Math.round(card.getBoundingClientRect().width + gap * 0.85)
+      : Math.round(el.clientWidth * 0.55);
+
     el.scrollBy({ left: dir * step, behavior: "smooth" });
 
-    // por si queda justo en el borde y no alcanza a “normalizar”
-    window.setTimeout(() => normalize(el), 350);
+    // por si está pausado (hover) y no “wrapea” por movimiento:
+    setTimeout(() => normalize(el), 350);
   };
+
 
   return (
     <div className="container">
@@ -199,7 +231,7 @@ export default function Home() {
         ) : featured.length === 0 ? (
           <div className="state">Cargando productos…</div>
         ) : (
-          <div className="home__carousel">
+          <div className="home__carousel" ref={carouselRef}>
             <button
               className="home__arrow home__arrow--left"
               type="button"
