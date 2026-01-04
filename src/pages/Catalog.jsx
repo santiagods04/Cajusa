@@ -20,11 +20,10 @@ export default function Catalog() {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState("");
 
-  // Search (con botón)
+ 
   const [queryDraft, setQueryDraft] = useState("");
   const [query, setQuery] = useState("");
 
-  // Sidebar filters
   const [selectedCategories, setSelectedCategories] = useState(new Set());
   const [selectedSizes, setSelectedSizes] = useState(new Set());
   const [selectedColors, setSelectedColors] = useState(new Set());
@@ -74,10 +73,8 @@ export default function Catalog() {
   const filtered = useMemo(() => {
     let list = products;
 
-    // 1) line
     if (line !== "all") list = list.filter((p) => p?.line === line);
 
-    // 2) search
     const q = normalize(query);
     if (q) {
       list = list.filter((p) => {
@@ -86,19 +83,16 @@ export default function Catalog() {
       });
     }
 
-    // 3) category
     if (selectedCategories.size) {
       list = list.filter((p) => selectedCategories.has(p?.category));
     }
 
-    // Talla (con disponibilidad)
     if (selectedSizes.size) {
       list = list.filter((p) =>
         (p?.variants || []).some((v) => v.available && selectedSizes.has(v.size))
       );
     }
 
-    // Color (con disponibilidad)
     if (selectedColors.size) {
       list = list.filter((p) =>
         (p?.variants || []).some((v) => v.available && selectedColors.has(v.color))

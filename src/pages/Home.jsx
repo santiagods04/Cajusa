@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useLayoutEffect } from "react";
 import { getProducts } from "../services/productsService";
 
 function formatCOP(value) {
@@ -41,14 +41,51 @@ export default function Home() {
     return [...featured, ...featured, ...featured];
   }, [featured]);
 
-  const BUFFER = 24; // pequeño. Si lo pones gigante, no “engancha” el loop.
+  const heroGallery = useMemo(() => {
+    const list = products
+      .map((p) => ({
+        id: p.id,
+        name: p.name,
+        img: Array.isArray(p.images) ? p.images[0] : null,
+      }))
+      .filter((x) => x.img);
+
+    return list.slice(0, 10);
+  }, [products]);
+
+  const heroLoop = useMemo(() => {
+    if (!heroGallery.length) return [];
+    return [...heroGallery, ...heroGallery];
+  }, [heroGallery]);
+
+  const heroTrackRef = useRef(null);
+  const perSlideSec = 5;
+  const heroDuration = `${heroGallery.length * perSlideSec}s`;
+
+  useLayoutEffect(() => {
+    const el = heroTrackRef.current;
+    if (!el || heroGallery.length === 0) return;
+
+    const applyShift = () => {
+      const half = el.scrollWidth / 2;
+      el.style.setProperty("--heroShift", `-${half}px`);
+    };
+
+    requestAnimationFrame(applyShift);
+
+    const ro = new ResizeObserver(() => requestAnimationFrame(applyShift));
+    ro.observe(el);
+
+    return () => ro.disconnect();
+  }, [heroGallery.length]);
+
+  const BUFFER = 24;
   const getSegment = (el) => el.scrollWidth / 3;
 
   const normalize = (el) => {
     const segment = getSegment(el);
     const max = el.scrollWidth - el.clientWidth;
 
-    // límites alcanzables (clamp) para que SIEMPRE pueda disparar
     const leftLimit = Math.max(0, segment - BUFFER);
     const rightLimit = Math.min(max, segment * 2 + BUFFER);
 
@@ -71,7 +108,7 @@ export default function Home() {
 
     requestAnimationFrame(() => {
       el.style.scrollBehavior = "auto";
-      el.scrollLeft = getSegment(el); // arranca en la copia del medio
+      el.scrollLeft = getSegment(el);
       el.style.scrollBehavior = "";
     });
   }, [featured.length]);
@@ -81,7 +118,7 @@ export default function Home() {
     const hoverEl = carouselRef.current;
     if (!el || !hoverEl || !featured.length) return;
 
-    const SPEED = 22; // px/seg (suave). Prueba 18–35.
+    const SPEED = 22;
     let last = 0;
 
     const tick = (t) => {
@@ -105,7 +142,6 @@ export default function Home() {
     hoverEl.addEventListener("mouseenter", pause);
     hoverEl.addEventListener("mouseleave", resume);
 
-    // extra pro: si alguien tab-navega, también pausa
     hoverEl.addEventListener("focusin", pause);
     hoverEl.addEventListener("focusout", resume);
 
@@ -123,14 +159,13 @@ export default function Home() {
     if (!el) return;
 
     const card = el.querySelector(".home__mini-card");
-    const gap = 14; // debe coincidir con tu CSS
+    const gap = 14;
     const step = card
       ? Math.round(card.getBoundingClientRect().width + gap * 0.85)
       : Math.round(el.clientWidth * 0.55);
 
     el.scrollBy({ left: dir * step, behavior: "smooth" });
 
-    // por si está pausado (hover) y no “wrapea” por movimiento:
     setTimeout(() => normalize(el), 350);
   };
 
@@ -139,81 +174,62 @@ export default function Home() {
     <div className="container">
       {/* HERO */}
       <section className="home__hero">
+        {/* Fondo difuminado (solo si hay imagen) */}
+        {heroProduct?.images?.[0] ? (
+          <div
+            className="home__hero-bg"
+            style={{ backgroundImage: `url(${heroProduct.images[0]})` }}
+            aria-hidden="true"
+          />
+        ) : null}
+
         <div className="home__hero-left">
+          <span className="home__eyebrow">Confección profesional y artesanal</span>
+
           <h1 className="home__title">Cajusa</h1>
 
           <p className="home__subtitle">
             Uniformes antifluido (Lafayette) y prendas en lino artesanal. Compra por WhatsApp.
           </p>
 
+          <ul className="home__bullets">
+            <li className="home__bullet">Guía de talla</li>
+            <li className="home__bullet">Calidad Textil</li>
+            <li className="home__bullet">Atención por WhatsApp</li>
+          </ul>
+
           <div className="home__actions">
             <Link to="/catalogo" className="link">
-              <button className="btn btn-primary" type="button">
-                Ver Catálogo
-              </button>
+              <button className="btn btn-primary" type="button">Ver Catálogo</button>
             </Link>
 
             <Link to="/catalogo?line=antifluido" className="link">
-              <button className="btn btn-ghost" type="button">
-                Antifluido
-              </button>
+              <button className="btn btn-ghost" type="button">Antifluido</button>
             </Link>
 
             <Link to="/catalogo?line=lino" className="link">
-              <button className="btn btn-ghost" type="button">
-                Lino artesanal
-              </button>
+              <button className="btn btn-ghost" type="button">Lino artesanal</button>
             </Link>
-          </div>
-
-          <div className="home__trust">
-            <span className="home__pill">Hecho a medida</span>
-            <span className="home__pill">Calidad Lafayette</span>
-            <span className="home__pill">Atención por WhatsApp</span>
           </div>
         </div>
 
         <div className="home__hero-right">
-          {heroProduct ? (
-            <Link className="home__highlight link" to={`/producto/${heroProduct.id}`}>
-              <div className="home__highlight-media">
-                {Array.isArray(heroProduct.images) && heroProduct.images[0] ? (
-                  <img
-                    className="home__highlight-img"
-                    src={heroProduct.images[0]}
-                    alt={heroProduct.name || "Producto destacado"}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="home__highlight-placeholder">
-                    {(heroProduct.name || "C").slice(0, 1).toUpperCase()}
+          <div className="home__hero-gallery">
+            <div className="home__hero-track" ref={heroTrackRef} style={{ "--heroDuration": heroDuration }}>
+              {heroLoop.map((item, idx) => (
+                <div className="home__hero-slide" key={`${item.id}-${idx}`}>
+                  <div className="home__hero-frame">
+                    <img
+                      className="home__hero-img"
+                      src={item.img}
+                      alt={item.name || "Prenda Cajusa"}
+                      loading="lazy"
+                    />
                   </div>
-                )}
-
-                <span className="home__highlight-badge">Destacado</span>
-
-                {getBadgeText(heroProduct.line) ? (
-                  <span className={`home__line-badge home__line-badge--${heroProduct.line}`}>
-                    {getBadgeText(heroProduct.line)}
-                  </span>
-                ) : null}
-              </div>
-
-              <div className="home__highlight-body">
-                <div className="home__highlight-name">{heroProduct.name}</div>
-                <div className="home__highlight-row">
-                  <span className="home__highlight-price">
-                    {formatCOP(heroProduct.price) || "Precio por WhatsApp"}
-                  </span>
-                  <span className="home__highlight-cta">Ver →</span>
                 </div>
-              </div>
-            </Link>
-          ) : (
-            <div className="home__highlight home__highlight--empty">
-              <p className="state">Cargando destacados…</p>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       </section>
 
@@ -286,7 +302,6 @@ export default function Home() {
           </div>
         )}
       </section>
-
     </div>
   );
 }

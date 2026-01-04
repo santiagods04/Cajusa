@@ -1,6 +1,4 @@
-/* =========================
-   Catálogo (tienda)
-   ========================= */
+
 
 .catalog__top {
   margin-bottom: 16px;
@@ -50,7 +48,7 @@
   border-radius: 12px;
 }
 
-/* Layout: sidebar + grid */
+
 .catalog__layout {
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -58,7 +56,7 @@
   align-items: start;
 }
 
-/* Sidebar */
+
 .catalog__panel {
   border: var(--border);
   border-radius: 14px;
@@ -131,7 +129,6 @@
   accent-color: var(--accent);
 }
 
-/* Content grid */
 .catalog__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -155,7 +152,7 @@
 .catalog__media {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 5; /* vertical bonito (puedes probar 3/4 o 2/3) */
+  aspect-ratio: 4 / 5; 
   overflow: hidden;
   border-radius: 14px 14px 0 0;
   isolation: isolate;
@@ -173,7 +170,7 @@
   height: 100%;
   display: block;
   object-fit: cover;
-  object-position: center 20%; /* sube un poquito el encuadre (ajustable) */
+  object-position: center 20%; 
 }
 
 .catalog__placeholder {
