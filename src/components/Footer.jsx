@@ -27,8 +27,6 @@ export default function Footer() {
           <p className="footer__ctaText">
             Escríbenos y te confirmamos disponibilidad y tiempos.
           </p>
-
-          {/* Ajusta el número */}
           <a
             className="btn btn--active footer__waBtn"
             href="https://wa.me/573214175149?text=Hola%20Cajusa%2C%20quiero%20hacer%20un%20pedido"
