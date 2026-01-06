@@ -11,7 +11,7 @@ class Api {
 
   getProducts() {
     if (!this._baseUrl) {
-      return Promise.reject(new Error("VITE_PRODUCTS_API_URL no está configurada"));
+      return Promise.reject(new Error("VITE_API_URL no está configurada"));
     }
 
     return fetch(`${this._baseUrl}/products`, {
@@ -21,7 +21,7 @@ class Api {
 
   getProductById(id) {
     if (!this._baseUrl) {
-      return Promise.reject(new Error("VITE_PRODUCTS_API_URL no está configurada"));
+      return Promise.reject(new Error("VITE_API_URL no está configurada"));
     }
 
     return fetch(`${this._baseUrl}/products/${encodeURIComponent(id)}`, {
@@ -31,7 +31,7 @@ class Api {
 }
 
 export const api = new Api({
-  baseUrl: import.meta.env.VITE_PRODUCTS_API_URL,
+  baseUrl: import.meta.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
