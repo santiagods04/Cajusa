@@ -9,9 +9,41 @@ class Api {
     return Promise.reject(new Error(`Error: ${res.status}`));
   }
 
+  getUsers() {
+    if (!this._baseUrl) {
+      return Promise.reject(new Error("VITE_MOCKAPI_URL no está configurada"));
+    }
+
+    return fetch(`${this._baseUrl}/users`, {
+      headers: this._headers,
+    }).then(this._checkResponse);
+  }
+
+  createUser(data) {
+    if (!this._baseUrl) {
+      return Promise.reject(new Error("VITE_MOCKAPI_URL no está configurada"));
+    }
+
+    return fetch(`${this._baseUrl}/users`, {
+      method: "POST",
+      headers: this._headers,
+      body: JSON.stringify(data),
+    }).then(this._checkResponse);
+  }
+
+  getUserById(id) {
+    if (!this._baseUrl) {
+      return Promise.reject(new Error("VITE_MOCKAPI_URL no está configurada"));
+    }
+
+    return fetch(`${this._baseUrl}/users/${encodeURIComponent(id)}`, {
+      headers: this._headers,
+    }).then(this._checkResponse);
+  }
+
   getProducts() {
     if (!this._baseUrl) {
-      return Promise.reject(new Error("VITE_API_URL no está configurada"));
+      return Promise.reject(new Error("VITE_MOCKAPI_URL no está configurada"));
     }
 
     return fetch(`${this._baseUrl}/products`, {
@@ -21,7 +53,7 @@ class Api {
 
   getProductById(id) {
     if (!this._baseUrl) {
-      return Promise.reject(new Error("VITE_API_URL no está configurada"));
+      return Promise.reject(new Error("VITE_MOCKAPI_URL no está configurada"));
     }
 
     return fetch(`${this._baseUrl}/products/${encodeURIComponent(id)}`, {
@@ -31,7 +63,7 @@ class Api {
 }
 
 export const api = new Api({
-  baseUrl: import.meta.env.VITE_API_URL,
+  baseUrl: import.meta.env.VITE_MOCKAPI_URL,
   headers: {
     "Content-Type": "application/json",
   },

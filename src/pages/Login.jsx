@@ -1,6 +1,15 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 export default function Login() {
+
+ const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const isValid = form.email && form.password && form.confirmPassword;
+
   function handleSubmit(e) {
     e.preventDefault();
     // TODO (backend): llamar endpoint /login y guardar token/sesión
@@ -41,7 +50,7 @@ export default function Login() {
               />
             </label>
 
-            <button className="btn btn--active auth__btn" type="submit">
+            <button className="btn btn--active auth__btn" type="submit" disabled={!isValid}>
               Iniciar sesión
             </button>
           </form>
