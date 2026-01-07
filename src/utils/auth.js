@@ -50,7 +50,6 @@ export async function login({ email, password }) {
     (u) => String(u.email || "").toLowerCase() === normalizedEmail
   );
 
-  // Mensaje genérico (buena práctica: no revelar si existe o no)
   if (!user) throw new Error("Correo o contraseña incorrectos");
 
   const passwordHash = await sha256(password);
@@ -59,7 +58,6 @@ export async function login({ email, password }) {
     throw new Error("Correo o contraseña incorrectos");
   }
 
-  // “sesión” en el front (para poder persistir)
   setUserId(user.id);
 
   return user;
