@@ -1,10 +1,12 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useContext } from "react";
 import { login } from "../utils/auth";
 import AppContext from "../context/AppContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/catalogo";
   const { handleAuthSuccess } = useContext(AppContext);
 
   const [form, setForm] = useState({
@@ -40,7 +42,7 @@ export default function Login() {
 
       handleAuthSuccess(user);
 
-      navigate("/catalogo");
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err.message || "No se pudo iniciar sesión");
     } finally {
