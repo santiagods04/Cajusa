@@ -1,5 +1,6 @@
 import { api } from "./api";
 import { sha256 } from "./hash";
+import { setUserId } from "./token";
 
 export async function register({ name, email, password, phone }) {
   const normalizedEmail = String(email).trim().toLowerCase();
@@ -33,6 +34,33 @@ export async function register({ name, email, password, phone }) {
     role: "user",
     phone: phone || "",
   });
+
+  return user;
+}
+
+export async function login({ email, password }) {
+  const normalizedEmail = String(email).trim().toLowerCase();
+
+  if (!normalizedEmail) throw new Error("El correo es obligatorio");
+  if (!password) throw new Error("La contraseña es obligatoria");
+
+  const users = await api.getUsers();
+
+  const user = users.find(
+    (u) => String(u.email || "").toLowerCase() === normalizedEmail
+  );
+
+  // Mensaje genérico (buena práctica: no revelar si existe o no)
+  if (!user) throw new Error("Correo o contraseña incorrectos");
+
+  const passwordHash = await sha256(password);
+
+  if (String(user.passwordHash) !== String(passwordHash)) {
+    throw new Error("Correo o contraseña incorrectos");
+  }
+
+  // “sesión” en el front (para poder persistir)
+  setUserId(user.id);
 
   return user;
 }

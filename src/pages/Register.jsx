@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { register } from "../utils/auth";
 
-export default function Register({ onAuthSuccess }) {
+export default function Register() {
 
   const navigate = useNavigate();
 
@@ -68,16 +68,11 @@ export default function Register({ onAuthSuccess }) {
     }
 
     const phone = `${code}${number}`;
-    setIsSubmitting(true);
 
+    setIsSubmitting(true);
     try {
-      // register espera { name?, email, password }
-      // tú no estás pidiendo name todavía, así que lo omitimos
       const user = await register({ name, email, password, phone });
       console.log("[REGISTER OK] user:", user);
-
-      // “sube” el usuario al estado global si quieres (App.jsx)
-      onAuthSuccess?.(user);
 
       navigate("/login");
     } catch (err) {

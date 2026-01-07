@@ -1,18 +1,51 @@
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useState, useContext } from "react";
+import { login } from "../utils/auth";
+import AppContext from "../context/AppContext";
 
 export default function Login() {
+  const navigate = useNavigate();
+  const { handleAuthSuccess } = useContext(AppContext);
 
- const [form, setForm] = useState({
+  const [form, setForm] = useState({
     email: "",
     password: "",
   });
 
-  const isValid = form.email && form.password && form.confirmPassword;
+  const[isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
-  function handleSubmit(e) {
+  const isValid = form.email && form.password;
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    // TODO (backend): llamar endpoint /login y guardar token/sesión
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      const user = await login({
+        email: form.email,
+        password: form.password,
+      });
+
+      console.log("[LOGIN OK] user:", user);
+
+      handleAuthSuccess(user);
+
+      navigate("/catalogo");
+    } catch (err) {
+      setError(err.message || "No se pudo iniciar sesión");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -33,6 +66,8 @@ export default function Login() {
                 name="email"
                 autoComplete="email"
                 placeholder="tu@correo.com"
+                value={form.email}
+                onChange={handleChange}
                 required
               />
             </label>
@@ -46,12 +81,16 @@ export default function Login() {
                 autoComplete="current-password"
                 placeholder="••••••••"
                 minLength={8}
+                value={form.password}
+                onChange={handleChange}
                 required
               />
             </label>
 
-            <button className="btn btn--active auth__btn" type="submit" disabled={!isValid}>
-              Iniciar sesión
+            {error && <p className="auth__error">{error}</p>}
+
+            <button className="btn btn--active auth__btn" type="submit" disabled={!isValid || isSubmitting}>
+              {isSubmitting ? "Iniciando..." : "Iniciar sesión"}
             </button>
           </form>
 
