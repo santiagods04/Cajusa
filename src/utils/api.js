@@ -3,13 +3,20 @@ class Api {
     this._baseUrl = baseUrl;
     this._headers = headers;
   }
-
+  
   _checkResponse(res) {
     if (res.ok) return res.json();
     return Promise.reject(new Error(`Error: ${res.status}`));
   }
 
+  _checkUrl() {
+    if (!this._baseUrl) {
+      return Promise.reject(new Error("VITE_MOCKAPI_URL no está configurada"));
+    }
+  }
+
   getUsers() {
+    this._checkUrl();
     if (!this._baseUrl) {
       return Promise.reject(new Error("VITE_MOCKAPI_URL no está configurada"));
     }
@@ -20,9 +27,7 @@ class Api {
   }
 
   createUser(data) {
-    if (!this._baseUrl) {
-      return Promise.reject(new Error("VITE_MOCKAPI_URL no está configurada"));
-    }
+    this._checkUrl();
 
     return fetch(`${this._baseUrl}/users`, {
       method: "POST",
@@ -32,9 +37,7 @@ class Api {
   }
 
   getUserById(id) {
-    if (!this._baseUrl) {
-      return Promise.reject(new Error("VITE_MOCKAPI_URL no está configurada"));
-    }
+    this._checkUrl();
 
     return fetch(`${this._baseUrl}/users/${encodeURIComponent(id)}`, {
       headers: this._headers,
@@ -42,9 +45,7 @@ class Api {
   }
 
   getProducts() {
-    if (!this._baseUrl) {
-      return Promise.reject(new Error("VITE_MOCKAPI_URL no está configurada"));
-    }
+    this._checkUrl();
 
     return fetch(`${this._baseUrl}/products`, {
       headers: this._headers,
@@ -52,9 +53,7 @@ class Api {
   }
 
   getProductById(id) {
-    if (!this._baseUrl) {
-      return Promise.reject(new Error("VITE_MOCKAPI_URL no está configurada"));
-    }
+    this._checkUrl();
 
     return fetch(`${this._baseUrl}/products/${encodeURIComponent(id)}`, {
       headers: this._headers,

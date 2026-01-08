@@ -20,7 +20,7 @@ export default function Header() {
     fontWeight: isActive ? 800 : 600,
   });
 
-  const displayName = currentUser?.name || currentUser?.email || "Usuario";
+  const displayName = currentUser?.nickname || currentUser?.name || "Usuario";
   const welcomeLabel = `Bienvenido - ${displayName}`;
 
   function toggleMenu() {

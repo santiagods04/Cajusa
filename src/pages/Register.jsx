@@ -9,6 +9,7 @@ export default function Register() {
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
+    nickname: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -19,6 +20,7 @@ export default function Register() {
   const isValid =
     form.firstName &&
     form.lastName &&
+    form.nickname &&
     form.email &&
     form.password &&
     form.confirmPassword &&
@@ -120,6 +122,21 @@ export default function Register() {
                   required
                 />
               </div>
+            </label>
+
+            <label className="auth__field">
+              <span className="auth__label">Nombre de usuario</span>
+              <input
+                className="auth__input"
+                type="text"
+                name="nickname"
+                autoComplete="nickname"
+                placeholder="userNickname123"
+                minLength={5}
+                value={form.nickname}
+                onChange={handleChange}
+                required
+              />
             </label>
 
             <label className="auth__field">
