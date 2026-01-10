@@ -139,18 +139,34 @@
 }
 
 .header__user-menu-item {
+  display: block;
   width: 100%;
   text-align: left;
 
   background: none;
-  border: none;
+  border: 0;
   border-radius: 10px;
 
   padding: 10px 12px;
-  cursor: pointer;
 
   font: inherit;
   color: var(--text);
+  text-decoration: none;
+
+  cursor: pointer;
+}
+
+.header__user-menu-item:visited {
+  color: var(--text);
+}
+
+.header__user-menu-item:focus-visible {
+  outline: 2px solid rgba(47, 111, 94, 0.4);
+  outline-offset: 2px;
+}
+
+.header__user-menu-item:hover {
+  background: var(--accent-soft);
 }
 
 .header__user-menu-item:hover {

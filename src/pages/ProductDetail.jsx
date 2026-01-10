@@ -146,7 +146,7 @@ export default function ProductDetail() {
 
   return (
     <div className="container">
-      <Link className="link product__back" to="/catalogo">
+      <Link className="link product__back" to="/catalog">
         ← Volver al catálogo
       </Link>
 

@@ -1,0 +1,174 @@
+.my-account {
+  padding: 36px 0 60px;
+}
+
+.my-account__container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.my-account__header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.my-account__title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.my-account__subtitle {
+  margin: 0;
+  color: rgba(42, 36, 30, 0.75);
+  line-height: 1.35;
+}
+
+.my-account__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.my-account__section {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(42, 36, 30, 0.12);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.my-account__section-title {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.my-account__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.my-account__subform {
+  margin-top: 16px;
+}
+
+.my-account__subform-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.my-account__field--full {
+  grid-column: 1 / -1;
+}
+
+.my-account__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.my-account__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.my-account__field--full {
+  grid-column: 1 / -1;
+}
+
+.my-account__field--span {
+  grid-column: 1 / -1;
+}
+
+.my-account__label {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(42, 36, 30, 0.85);
+}
+
+.my-account__input,
+.my-account__textarea {
+  width: 100%;
+  box-sizing: border-box;
+
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(42, 36, 30, 0.18);
+  border-radius: 12px;
+
+  padding: 10px 12px;
+  color: var(--text);
+  font: inherit;
+
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.my-account__textarea {
+  resize: vertical;
+  min-height: 84px;
+}
+
+.my-account__input::placeholder,
+.my-account__textarea::placeholder {
+  color: rgba(42, 36, 30, 0.45);
+}
+
+.my-account__input:focus,
+.my-account__textarea:focus {
+  border-color: rgba(47, 111, 94, 0.45);
+  box-shadow: 0 0 0 3px rgba(47, 111, 94, 0.12);
+}
+
+.my-account__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.my-account__button {
+  border: 1px solid rgba(42, 36, 30, 0.12);
+  background: rgba(47, 111, 94, 0.12);
+  color: var(--text);
+
+  border-radius: 999px;
+  padding: 10px 14px;
+
+  font-weight: 800;
+  cursor: pointer;
+
+  transition: transform 0.06s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.my-account__button:hover {
+  background: var(--accent-soft);
+  border-color: rgba(177, 74, 47, 0.22);
+}
+
+.my-account__button:active {
+  transform: translateY(1px);
+}
+
+.my-account__hint {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(42, 36, 30, 0.6);
+}
+
+@media (max-width: 720px) {
+  .my-account__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .my-account__title {
+    font-size: 26px;
+  }
+}

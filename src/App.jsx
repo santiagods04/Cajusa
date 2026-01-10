@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Catalog from "./pages/Catalog";
 import ProductDetail from "./pages/ProductDetail";
 import Admin from "./pages/Admin";
+import MyAccount from "./pages/MyAccount";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Footer from "./components/Footer";
@@ -55,8 +56,15 @@ function App() {
         <main className="app__main">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/catalogo" element={<Catalog />} />
-            <Route path="/producto/:id" element={<ProductDetail />} />
+            <Route path="/catalog" element={<Catalog />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/my-account" 
+              element={
+                <ProtectedRoute>
+                  <MyAccount />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/admin"
               element={

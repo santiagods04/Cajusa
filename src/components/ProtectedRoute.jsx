@@ -19,7 +19,7 @@ export default function ProtectedRoute({ children, anonymous = false, requiredRo
   }
 
   if (requiredRole && currentUser?.role !== requiredRole) {
-    return <Navigate to="/catalogo" replace />;
+    return <Navigate to="/catalog" replace />;
   }
 
   return children;

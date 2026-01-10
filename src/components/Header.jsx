@@ -97,24 +97,27 @@ export default function Header() {
                   {/* Opciones USER */}
                   {isUser && (
                     <>
-                      <button type="button" className="header__user-menu-item" role="menuitem" disabled>
-                        Mi cuenta (próximamente)
-                      </button>
-                      <button type="button" className="header__user-menu-item" role="menuitem" disabled>
-                        Favoritos (próximamente)
-                      </button>
+                      <Link to="/my-account" className="header__user-menu-item" role="menuitem" onClick={() => setIsMenuOpen(false)}>
+                        Mi cuenta
+                      </Link>
+                      <Link to="/my-favorites" className="header__user-menu-item" role="menuitem" onClick={() => setIsMenuOpen(false)}>
+                        Favoritos
+                      </Link>
+                      <Link to="/my-orders" className="header__user-menu-item" role="menuitem" onClick={() => setIsMenuOpen(false)}>
+                        Mis pedidos
+                      </Link>
                     </>
                   )}
 
                   {/* Opciones ADMIN */}
                   {isAdmin && (
                     <>
-                      <button type="button" className="header__user-menu-item" role="menuitem" disabled>
-                        Panel admin (próximamente)
-                      </button>
-                      <button type="button" className="header__user-menu-item" role="menuitem" disabled>
-                        Gestionar productos (próximamente)
-                      </button>
+                      <Link to="/my-account" className="header__user-menu-item" role="menuitem" onClick={() => setIsMenuOpen(false)}>
+                        Mi cuenta
+                      </Link>
+                      <Link to="/panel-admin" className="header__user-menu-item" role="menuitem" onClick={() => setIsMenuOpen(false)}>
+                        Panel admin
+                      </Link>
                     </>
                   )}
 
