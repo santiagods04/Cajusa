@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import { getProducts } from "../services/productsService";
+import { getProducts } from "../../services/productsService";
 
 const formatCOP = (value) => {
   if (typeof value !== "number") return null;
@@ -284,7 +284,7 @@ export default function Catalog() {
                           : null;
 
                     return (
-                      <Link key={p.id} className="catalog__card" to={`/producto/${p.id}`}>
+                      <Link key={p.id} className="catalog__card" to={`/product/${p.id}`}>
                         <div
                           className={`catalog__media ${img ? "" : "catalog__media--placeholder"
                             }`}

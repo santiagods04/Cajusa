@@ -1,5 +1,5 @@
 import { useContext, useMemo, useState } from "react";
-import AppContext from "../context/AppContext";
+import AppContext from "../../../context/AppContext";
 
 export default function MyAccount() {
     const { currentUser } = useContext(AppContext);
@@ -15,6 +15,155 @@ export default function MyAccount() {
     }, [currentUser]);
 
     const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
+
+    const isAdmin = currentUser?.role === 'admin';
+
+    function renderAddressesSection() {
+        return (
+            <section className="my-account__section" aria-labelledby="my-account-address">
+                <h2 className="my-account__section-title" id="my-account-address">
+                    Direcciones de domicilio
+                </h2>
+
+                {!addresses.length && !isAddressFormOpen ? (
+                    <>
+                        <p className="my-account__hint">Sin direcciones guardadas.</p>
+
+                        <div className="my-account__actions">
+                            <button
+                                type="button"
+                                className="my-account__button"
+                                onClick={() => setIsAddressFormOpen(true)}
+                            >
+                                Agregar dirección
+                            </button>
+
+                            <p className="my-account__hint">
+                                (Después definimos si será 1 dirección o múltiples.)
+                            </p>
+                        </div>
+                    </>
+                ) : (
+                    <form className="my-account__form" autoComplete="on">
+                        <div className="my-account__grid">
+                            <div className="my-account__field">
+                                <label className="my-account__label" htmlFor="my-account-department">
+                                    Departamento
+                                </label>
+                                <input
+                                    className="my-account__input"
+                                    id="my-account-department"
+                                    name="department"
+                                    type="text"
+                                    placeholder="Ej: Cundinamarca"
+                                />
+                            </div>
+
+                            <div className="my-account__field">
+                                <label className="my-account__label" htmlFor="my-account-city">
+                                    Ciudad / Municipio
+                                </label>
+                                <input
+                                    className="my-account__input"
+                                    id="my-account-city"
+                                    name="city"
+                                    type="text"
+                                    placeholder="Ej: Bogotá / Villeta"
+                                />
+                            </div>
+
+                            <div className="my-account__field">
+                                <label className="my-account__label" htmlFor="my-account-neighborhood">
+                                    Barrio
+                                </label>
+                                <input
+                                    className="my-account__input"
+                                    id="my-account-neighborhood"
+                                    name="neighborhood"
+                                    type="text"
+                                    placeholder="Ej: Centro"
+                                />
+                            </div>
+
+                            <div className="my-account__field">
+                                <label className="my-account__label" htmlFor="my-account-zip">
+                                    Código postal (opcional)
+                                </label>
+                                <input
+                                    className="my-account__input"
+                                    id="my-account-zip"
+                                    name="zip"
+                                    type="text"
+                                    placeholder="Ej: 110111"
+                                    inputMode="numeric"
+                                />
+                            </div>
+
+                            <div className="my-account__field my-account__field--full">
+                                <label className="my-account__label" htmlFor="my-account-address1">
+                                    Dirección
+                                </label>
+                                <input
+                                    className="my-account__input"
+                                    id="my-account-address1"
+                                    name="addressLine1"
+                                    type="text"
+                                    placeholder="Ej: Cra 5 # 6 - 24"
+                                    autoComplete="street-address"
+                                />
+                            </div>
+
+                            <div className="my-account__field my-account__field--full">
+                                <label className="my-account__label" htmlFor="my-account-address2">
+                                    Complemento (opcional)
+                                </label>
+                                <input
+                                    className="my-account__input"
+                                    id="my-account-address2"
+                                    name="addressLine2"
+                                    type="text"
+                                    placeholder="Apto, torre, interior, piso..."
+                                />
+                            </div>
+
+                            <div className="my-account__field my-account__field--full">
+                                <label className="my-account__label" htmlFor="my-account-notes">
+                                    Indicaciones para el mensajero (opcional)
+                                </label>
+                                <textarea
+                                    className="my-account__textarea"
+                                    id="my-account-notes"
+                                    name="deliveryNotes"
+                                    placeholder="Ej: Portería, timbre, referencias..."
+                                    rows={3}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="my-account__actions">
+                            <button type="button" className="my-account__button">
+                                Guardar dirección
+                            </button>
+
+                            {!addresses.length && (
+                                <button
+                                    type="button"
+                                    className="my-account__button"
+                                    onClick={() => setIsAddressFormOpen(false)}
+                                >
+                                    Cancelar
+                                </button>
+                            )}
+
+                            <p className="my-account__hint">
+                                (Después definimos si será 1 dirección o múltiples.)
+                            </p>
+                        </div>
+                    </form>
+                )}
+            </section>
+        );
+    }
 
     return (
         <section className="my-account">
@@ -185,151 +334,7 @@ export default function MyAccount() {
                     </section>
 
                     {/* 3) Direcciones */}
-                    <section className="my-account__section" aria-labelledby="my-account-address">
-                        <h2 className="my-account__section-title" id="my-account-address">
-                            Direcciones de domicilio
-                        </h2>
-
-                        {/*  */}
-                        {!addresses.length && !isAddressFormOpen ? (
-                            <>
-                                <p className="my-account__hint">Sin direcciones guardadas.</p>
-
-                                <div className="my-account__actions">
-                                    <button
-                                        type="button"
-                                        className="my-account__button"
-                                        onClick={() => setIsAddressFormOpen(true)}
-                                    >
-                                        Agregar dirección
-                                    </button>
-
-                                    <p className="my-account__hint">
-                                        (Después definimos si será 1 dirección o múltiples.)
-                                    </p>
-                                </div>
-                            </>
-                        ) : (
-                            <form className="my-account__form" autoComplete="on">
-                                <div className="my-account__grid">
-                                    {/* --- AQUÍ PEGAS TU FORM ACTUAL TAL CUAL --- */}
-                                    {/* Departamento, ciudad, barrio, zip, address1, address2, notes... */}
-                                    <div className="my-account__field">
-                                        <label className="my-account__label" htmlFor="my-account-department">
-                                            Departamento
-                                        </label>
-                                        <input
-                                            className="my-account__input"
-                                            id="my-account-department"
-                                            name="department"
-                                            type="text"
-                                            placeholder="Ej: Cundinamarca"
-                                        />
-                                    </div>
-
-                                    <div className="my-account__field">
-                                        <label className="my-account__label" htmlFor="my-account-city">
-                                            Ciudad / Municipio
-                                        </label>
-                                        <input
-                                            className="my-account__input"
-                                            id="my-account-city"
-                                            name="city"
-                                            type="text"
-                                            placeholder="Ej: Bogotá / Villeta"
-                                        />
-                                    </div>
-
-                                    <div className="my-account__field">
-                                        <label className="my-account__label" htmlFor="my-account-neighborhood">
-                                            Barrio
-                                        </label>
-                                        <input
-                                            className="my-account__input"
-                                            id="my-account-neighborhood"
-                                            name="neighborhood"
-                                            type="text"
-                                            placeholder="Ej: Centro"
-                                        />
-                                    </div>
-
-                                    <div className="my-account__field">
-                                        <label className="my-account__label" htmlFor="my-account-zip">
-                                            Código postal (opcional)
-                                        </label>
-                                        <input
-                                            className="my-account__input"
-                                            id="my-account-zip"
-                                            name="zip"
-                                            type="text"
-                                            placeholder="Ej: 110111"
-                                            inputMode="numeric"
-                                        />
-                                    </div>
-
-                                    <div className="my-account__field my-account__field--full">
-                                        <label className="my-account__label" htmlFor="my-account-address1">
-                                            Dirección
-                                        </label>
-                                        <input
-                                            className="my-account__input"
-                                            id="my-account-address1"
-                                            name="addressLine1"
-                                            type="text"
-                                            placeholder="Ej: Cra 5 # 6 - 24"
-                                            autoComplete="street-address"
-                                        />
-                                    </div>
-
-                                    <div className="my-account__field my-account__field--full">
-                                        <label className="my-account__label" htmlFor="my-account-address2">
-                                            Complemento (opcional)
-                                        </label>
-                                        <input
-                                            className="my-account__input"
-                                            id="my-account-address2"
-                                            name="addressLine2"
-                                            type="text"
-                                            placeholder="Apto, torre, interior, piso..."
-                                        />
-                                    </div>
-
-                                    <div className="my-account__field my-account__field--full">
-                                        <label className="my-account__label" htmlFor="my-account-notes">
-                                            Indicaciones para el mensajero (opcional)
-                                        </label>
-                                        <textarea
-                                            className="my-account__textarea"
-                                            id="my-account-notes"
-                                            name="deliveryNotes"
-                                            placeholder="Ej: Portería, timbre, referencias..."
-                                            rows={3}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="my-account__actions">
-                                    <button type="button" className="my-account__button">
-                                        Guardar dirección
-                                    </button>
-
-                                    {!addresses.length && (
-                                        <button
-                                            type="button"
-                                            className="my-account__button"
-                                            onClick={() => setIsAddressFormOpen(false)}
-                                        >
-                                            Cancelar
-                                        </button>
-                                    )}
-
-                                    <p className="my-account__hint">
-                                        (Después definimos si será 1 dirección o múltiples.)
-                                    </p>
-                                </div>
-                            </form>
-                        )}
-                    </section>
+                    {!isAdmin && renderAddressesSection()}
                 </div>
             </div>
         </section>

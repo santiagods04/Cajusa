@@ -1,18 +1,19 @@
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Header from "./components/Header";
-import Home from "./pages/Home";
-import Catalog from "./pages/Catalog";
-import ProductDetail from "./pages/ProductDetail";
-import Admin from "./pages/Admin";
-import MyAccount from "./pages/MyAccount";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";
+import Home from "./pages/public/Home";
+import Catalog from "./pages/public/Catalog";
+import ProductDetail from "./pages/public/ProductDetail";
+import Login from "./pages/public/Login";
+import Register from "./pages/public/Register";
+import MyAccount from "./pages/protected/shared/MyAccount";
+import Dashboard from "./pages/protected/shared/Dashboard";
 import { api } from "./utils/api";
 import { getUserId, removeUserId } from "./utils/token";
 import AppContext from "./context/AppContext";
-import ProtectedRoute from "./components/ProtectedRoute";
+
 
 function App() {
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/catalog" element={<Catalog />} />
             <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/my-account" 
+            <Route path="/my-account"
               element={
                 <ProtectedRoute>
                   <MyAccount />
@@ -66,13 +67,21 @@ function App() {
               }
             />
             <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            {/* <Route
               path="/admin"
               element={
                 <ProtectedRoute requiredRole="admin">
                   <Admin />
                 </ProtectedRoute>
               }
-            />
+            /> */}
             <Route
               path="/login"
               element={

@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useContext } from "react";
-import { login } from "../utils/auth";
-import AppContext from "../context/AppContext";
+import { login } from "../../utils/auth";
+import AppContext from "../../context/AppContext";
 
 export default function Login() {
   const navigate = useNavigate();

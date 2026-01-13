@@ -12,8 +12,13 @@ export default function Header() {
 
   const { isLoggedIn, currentUser, handleSignOut } = useContext(AppContext);
   const role = currentUser?.role || "user";
-  const isUser = isLoggedIn && role === "user";
   const isAdmin = isLoggedIn && role === "admin";
+  const dashboardLabel = isAdmin ? "Panel de Administración" : "Panel de Usuario";
+
+  const menuItems = [
+    { to: "/my-account", label: "Mi cuenta" },
+    { to: "/dashboard", label: dashboardLabel },
+  ];
 
   const isAuthRoute = location.pathname === "/login" || location.pathname === "/register";
   const getNavStyle = ({ isActive }) => ({
@@ -67,7 +72,7 @@ export default function Header() {
           <NavLink to="/" className="link" style={getNavStyle}>
             Inicio
           </NavLink>
-          <NavLink to="/catalogo" className="link" style={getNavStyle}>
+          <NavLink to="/catalog" className="link" style={getNavStyle}>
             Catálogo
           </NavLink>
           {!isLoggedIn ? (
@@ -94,32 +99,17 @@ export default function Header() {
 
               {isMenuOpen && (
                 <div className="header__user-menu-dropdown" role="menu" aria-label="Menú de usuario">
-                  {/* Opciones USER */}
-                  {isUser && (
-                    <>
-                      <Link to="/my-account" className="header__user-menu-item" role="menuitem" onClick={() => setIsMenuOpen(false)}>
-                        Mi cuenta
-                      </Link>
-                      <Link to="/my-favorites" className="header__user-menu-item" role="menuitem" onClick={() => setIsMenuOpen(false)}>
-                        Favoritos
-                      </Link>
-                      <Link to="/my-orders" className="header__user-menu-item" role="menuitem" onClick={() => setIsMenuOpen(false)}>
-                        Mis pedidos
-                      </Link>
-                    </>
-                  )}
-
-                  {/* Opciones ADMIN */}
-                  {isAdmin && (
-                    <>
-                      <Link to="/my-account" className="header__user-menu-item" role="menuitem" onClick={() => setIsMenuOpen(false)}>
-                        Mi cuenta
-                      </Link>
-                      <Link to="/panel-admin" className="header__user-menu-item" role="menuitem" onClick={() => setIsMenuOpen(false)}>
-                        Panel admin
-                      </Link>
-                    </>
-                  )}
+                  {menuItems.map((item) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className="header__user-menu-item"
+                      role="menuitem"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
 
                   <div className="header__user-menu-divider" />
 

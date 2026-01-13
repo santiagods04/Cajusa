@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState, useLayoutEffect } from "react";
-import { getProducts } from "../services/productsService";
+import { getProducts } from "../../services/productsService";
 
 function formatCOP(value) {
   if (typeof value !== "number") return null;

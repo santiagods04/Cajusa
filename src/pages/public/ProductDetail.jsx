@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import { getProductById, getProducts } from "../services/productsService";
-import { openWhatsApp } from "../utils/whatsapp";
+import { getProductById, getProducts } from "../../services/productsService";
+import { openWhatsApp } from "../../utils/whatsapp";
 
 export default function ProductDetail() {
   const { id } = useParams();
