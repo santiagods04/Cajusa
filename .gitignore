@@ -1,0 +1,52 @@
+# --- Monorepo Node/React (frontend + backend) ---
+
+# Dependencias
+**/node_modules/
+
+# Builds / empaquetados
+**/dist/
+**/build/
+**/.next/
+**/.nuxt/
+
+# Cobertura / reportes
+coverage/
+.nyc_output/
+
+# Logs
+logs/
+**/*.log
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Caches y artefactos de herramientas
+.eslintcache
+**/.cache/
+**/.parcel-cache/
+**/.vite/
+**/.tmp/
+.turbo/
+
+# PIDs / seeds (backend)
+pids/
+**/*.pid
+**/*.pid.lock
+**/*.seed
+
+# Variables de entorno (NO subir secretos)
+**/.env
+**/.env.*
+!**/.env.example
+
+# IDE / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
