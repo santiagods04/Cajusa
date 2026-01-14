@@ -1,11 +1,12 @@
 {
-  "name": "web_project_around_express",
+  "name": "cajusa-backend",
   "version": "1.0.0",
   "description": "Sprint 16",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npx eslint .",
+    "build": "echo \"no build for backend\"",
     "dev": "nodemon app.js",
     "start": "node app.js",
     "seed:admin": "node scripts/seedAdmin.js"

@@ -1,17 +1,34 @@
 # Cajusa
 
-Repositorio central (documentación) del proyecto Cajusa.
+Monorepo del proyecto **Cajusa** (Frontend + Backend) administrado con **npm workspaces**.
 
-## Repos
-- Frontend: [(link a Cajusa-frontend)](https://github.com/santiagods04/Cajusa-backend)
-- Backend: [(link a Cajusa-backend)](https://github.com/santiagods04/Cajusa-backend)
+## Requisitos
+- **Node.js ≥ 18** y **npm ≥ 10**
+- **MongoDB** local o Atlas
+- Archivos de entorno por app (`.env`) basados en los `*.env.example`
 
-## Trello
-- Tablero: [(link al tablero)](https://trello.com/b/U6r8KKqE/triple-ten-proyecto-final)
+## Estructura
+Cajusa/
+├─ Cajusa-frontend/ # React + Vite
+└─ Cajusa-backend/ # Node.js + Express + MongoDB
 
-## Deploy (cuando exista)
-- Frontend: (URL)
-- Backend/API: (URL)
+## Instalación y ejecución
 
-## Notas
-- Este repo no contiene código. Solo documentación y enlaces.
+Desde la raíz del monorepo:
+
+# Instalar todas las dependencias (workspaces)
+npm install
+
+# Levantar ambos servicios (backend + frontend)
+npm run dev
+
+## Scripts disponibles
+
+En la raíz:
+
+npm run dev         # back + front (concurrently)
+npm run dev:back    # solo backend
+npm run dev:front   # solo frontend
+npm run build       # build en todos los paquetes
+npm run build:back  # build backend (placeholder)
+npm run build:front # build frontend

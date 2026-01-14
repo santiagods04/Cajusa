@@ -62,7 +62,7 @@ class Api {
 }
 
 export const api = new Api({
-  baseUrl: import.meta.env.VITE_MOCKAPI_URL,
+  baseUrl: import.meta.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
