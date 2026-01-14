@@ -1,0 +1,10 @@
+@import url("./blocks/global/layout.css");
+@import url("./blocks/global/app.css");
+@import url("./blocks/global/header.css");
+@import url("./blocks/global/footer.css");
+@import url("./blocks/public/home.css");
+@import url("./blocks/public/auth.css");
+@import url("./blocks/public/catalog.css");
+@import url("./blocks/public/productDetail.css");
+@import url("./blocks/protected/shared/myAccount.css");
+@import url("./blocks/protected/shared/dashboard.css");

@@ -1,0 +1,211 @@
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+
+  border-bottom: var(--border);
+  background: rgba(247, 239, 227, 0.92);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(42, 36, 30, 0.08);
+}
+
+.header::after {
+  content: "";
+  display: block;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(42, 36, 30, 0.26) 0 10px,
+    transparent 10px 18px
+  );
+  opacity: 0.40;
+}
+
+.header__inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.header__inner > a.link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.header__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0; 
+}
+
+.header__brand::after {
+  content: "Uniformes antifluido LaFayette • Lino artesanal";
+  display: block;
+  margin-top: 5px;
+
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.1px;
+  color: var(--muted);
+}
+
+.header__logo {
+  height: 82px;
+  width: auto;
+  display: block;
+  opacity: 0.98;
+  filter: drop-shadow(0 10px 22px rgba(42, 36, 30, 0.12));
+}
+
+.header__nav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 2px;
+  flex-wrap: wrap;
+}
+
+.header__nav .link {
+  padding: 8px 12px;
+  border-radius: 999px;
+
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(42, 36, 30, 0.12);
+  font-weight: 600;
+  color: var(--text);
+
+  transition: transform 0.06s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.header__nav .link:hover {
+  background: var(--accent-soft);
+  border-color: rgba(177, 74, 47, 0.22);
+}
+
+.header__nav .link:active {
+  transform: translateY(1px);
+}
+
+.header__nav .link[aria-current="page"] {
+  background: rgba(47, 111, 94, 0.12);
+  border-color: rgba(47, 111, 94, 0.40);
+  box-shadow: 0 0 0 2px rgba(47, 111, 94, 0.08) inset;
+}
+
+.header__user-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.header__user-menu-trigger {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.header__user-menu-chevron {
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.header__user-menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+
+  min-width: 240px;
+  padding: 6px;
+
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
+
+  z-index: 100;
+}
+
+.header__user-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+
+  background: none;
+  border: 0;
+  border-radius: 10px;
+
+  padding: 10px 12px;
+
+  font: inherit;
+  color: var(--text);
+  text-decoration: none;
+
+  cursor: pointer;
+}
+
+.header__user-menu-item:visited {
+  color: var(--text);
+}
+
+.header__user-menu-item:focus-visible {
+  outline: 2px solid rgba(47, 111, 94, 0.4);
+  outline-offset: 2px;
+}
+
+.header__user-menu-item:hover {
+  background: var(--accent-soft);
+}
+
+.header__user-menu-item:hover {
+  background: var(--accent-soft);
+}
+
+.header__user-menu-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.header__user-menu-divider {
+  height: 1px;
+  margin: 6px 0;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.header__user-menu-item--danger {
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .header__inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .header__nav {
+    margin-left: 0;
+  }
+
+  .header__logo {
+    height: 54px;
+  }
+
+  .header__user-menu-dropdown {
+    left: 0;
+    right: auto;
+    min-width: 220px;
+  }
+}

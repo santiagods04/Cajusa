@@ -1,0 +1,16 @@
+.app__main {
+  padding: 16px 0;
+}
+
+.state {
+  padding: 16px;
+}
+
+.list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.list__item {
+  margin-bottom: 10px;
+}
