@@ -1,7 +1,7 @@
+import { getToken } from './token';
 class Api {
-  constructor({ baseUrl, headers = {} }) {
-    this._baseUrl = baseUrl;
-    this._headers = headers;
+  constructor(url) {
+    this._url = url;
   }
   
   _checkResponse(res) {
@@ -10,28 +10,42 @@ class Api {
   }
 
   _checkUrl() {
-    if (!this._baseUrl) {
-      return Promise.reject(new Error("VITE_MOCKAPI_URL no está configurada"));
+    if (!this._url) {
+      return Promise.reject(new Error("VITE_API_URL no está configurada"));
     }
+  }
+
+   _checkToken() {
+    const jwt = getToken();
+    if (!jwt) throw new Error("No token found");
+    return jwt;
+  }
+
+   _getHeaders() {
+    const token = this._checkToken();
+    return {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    };
   }
 
   getUsers() {
     this._checkUrl();
-    if (!this._baseUrl) {
-      return Promise.reject(new Error("VITE_MOCKAPI_URL no está configurada"));
+    if (!this._url) {
+      return Promise.reject(new Error("VITE_API_URL no está configurada"));
     }
 
-    return fetch(`${this._baseUrl}/users`, {
-      headers: this._headers,
+    return fetch(`${this._url}/users`, {
+      headers: this._getHeaders(),
     }).then(this._checkResponse);
   }
 
   createUser(data) {
     this._checkUrl();
 
-    return fetch(`${this._baseUrl}/users`, {
+    return fetch(`${this._url}/users`, {
       method: "POST",
-      headers: this._headers,
+      headers: this._getHeaders(),
       body: JSON.stringify(data),
     }).then(this._checkResponse);
   }
@@ -39,31 +53,27 @@ class Api {
   getUserById(id) {
     this._checkUrl();
 
-    return fetch(`${this._baseUrl}/users/${encodeURIComponent(id)}`, {
-      headers: this._headers,
+    return fetch(`${this._url}/users/${encodeURIComponent(id)}`, {
+      headers: this._getHeaders(),
     }).then(this._checkResponse);
   }
 
   getProducts() {
     this._checkUrl();
 
-    return fetch(`${this._baseUrl}/products`, {
-      headers: this._headers,
+    return fetch(`${this._url}/products`, {
+      headers: this._getHeaders(),
     }).then(this._checkResponse);
   }
 
   getProductById(id) {
     this._checkUrl();
 
-    return fetch(`${this._baseUrl}/products/${encodeURIComponent(id)}`, {
-      headers: this._headers,
+    return fetch(`${this._url}/products/${encodeURIComponent(id)}`, {
+      headers: this._getHeaders(),
     }).then(this._checkResponse);
   }
 }
 
-export const api = new Api({
-  baseUrl: import.meta.env.VITE_API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+const api = new Api(import.meta.env.VITE_API_URL);
+export default api ;

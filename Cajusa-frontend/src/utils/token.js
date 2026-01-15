@@ -1,13 +1,13 @@
-const USER_ID_KEY = "cajusa_user_id";
+const TOKEN_KEY = "cajusa_jwt";
 
-export function setUserId(id) {
-  localStorage.setItem(USER_ID_KEY, id);
+export function setToken(token) {
+  localStorage.setItem(TOKEN_KEY, token);
 }
 
-export function getUserId() {
-  return localStorage.getItem(USER_ID_KEY);
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
 }
 
-export function removeUserId() {
-  localStorage.removeItem(USER_ID_KEY);
+export function removeToken() {
+  localStorage.removeItem(TOKEN_KEY);
 }

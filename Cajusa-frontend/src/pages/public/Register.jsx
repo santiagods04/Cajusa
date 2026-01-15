@@ -1,10 +1,11 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { register } from "../../utils/auth";
+import { Link } from "react-router-dom";
+import { useState, useContext } from "react";
+import AppContext from "../../context/AppContext";
 
 export default function Register() {
 
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -25,11 +26,11 @@ export default function Register() {
     form.password &&
     form.confirmPassword &&
     form.countryCode &&
-    form.phoneNumber;
+    form.phoneNumber
+  ;
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
-
+  const {handleRegistration} = useContext(AppContext);
+  
   function handleChange(e) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -39,7 +40,7 @@ export default function Register() {
     e.preventDefault();
     setError("");
 
-    const { email, password, confirmPassword } = form;
+    const { email, password, confirmPassword, nickname } = form;
 
     const firstNameClean = String(form.firstName || "").trim().replace(/\s+/g, " ");
     const lastNameClean = String(form.lastName || "").trim().replace(/\s+/g, " ");
@@ -57,7 +58,7 @@ export default function Register() {
 
     const rawCode = String(form.countryCode || "").trim();
     const code = rawCode.startsWith("+") ? rawCode : `+${rawCode}`;
-    const number = String(form.phoneNumber || "").replace(/\D/g, ""); // solo dígitos
+    const number = String(form.phoneNumber || "").replace(/\D/g, "");
 
     if (!/^\+\d{1,4}$/.test(code)) {
       setError("Indicativo inválido (ej: +57)");
@@ -73,10 +74,7 @@ export default function Register() {
 
     setIsSubmitting(true);
     try {
-      const user = await register({ name, email, password, phone });
-      console.log("[REGISTER OK] user:", user);
-
-      navigate("/login");
+      await handleRegistration({ name, nickname, email, password, confirmPassword, phone });
     } catch (err) {
       setError(err.message || "No se pudo registrar");
     } finally {

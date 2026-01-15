@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";
@@ -10,8 +10,9 @@ import Login from "./pages/public/Login";
 import Register from "./pages/public/Register";
 import MyAccount from "./pages/protected/shared/MyAccount";
 import Dashboard from "./pages/protected/shared/Dashboard";
-import { api } from "./utils/api";
-import { getUserId, removeUserId } from "./utils/token";
+import api from "./utils/api";
+import * as auth from "./utils/auth";
+import * as token from "./utils/token";
 import AppContext from "./context/AppContext";
 
 
@@ -19,6 +20,22 @@ function App() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+
+  const contextValue = useMemo(() => ({
+    isLoggedIn,
+    currentUser,
+    setIsLoggedIn,
+    setCurrentUser,
+    handleSignOut,
+    handleAuthSuccess,
+    handleRegistration,
+  }), [isLoggedIn, currentUser]);
+
+  async function handleRegistration(payload) {
+    const user = await auth.register(payload);
+    navigate("/login");
+    return user;
+  }
 
   function handleAuthSuccess(user) {
     setIsLoggedIn(true);
@@ -33,7 +50,7 @@ function App() {
   }
 
   useEffect(() => {
-    const id = getUserId();
+    const id = token.getToken();
     if (!id) return;
 
     api.getUserById(id)
@@ -51,7 +68,7 @@ function App() {
 
   return (
     <div className="app">
-      <AppContext.Provider value={{ isLoggedIn, currentUser, setIsLoggedIn, setCurrentUser, handleSignOut, handleAuthSuccess }}>
+      <AppContext.Provider value={contextValue}>
         <Header />
 
         <main className="app__main">
