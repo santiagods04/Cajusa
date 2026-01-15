@@ -21,50 +21,67 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
-  const contextValue = useMemo(() => ({
-    isLoggedIn,
-    currentUser,
-    setIsLoggedIn,
-    setCurrentUser,
-    handleSignOut,
-    handleAuthSuccess,
-    handleRegistration,
-  }), [isLoggedIn, currentUser]);
-
   async function handleRegistration(payload) {
     const user = await auth.register(payload);
     navigate("/login");
     return user;
   }
 
-  function handleAuthSuccess(user) {
-    setIsLoggedIn(true);
-    setCurrentUser(user);
+  function handleLogin({ email, password, from }) {
+    if (!email || !password) return;
+
+    return auth.login({ email, password })
+      .then(({ token: jwt }) => {
+        token.setToken(jwt);
+        return api.getInfoUser();
+      })
+      .then((user) => {
+        setIsLoggedIn(true);
+        setCurrentUser(user);
+        navigate(from, { replace: true });
+        console.log("Login successful", user);
+      })
+      .catch((err) => {
+        console.error(err);
+        token.removeToken();
+        setIsLoggedIn(false);
+        throw err;
+      });
   }
 
   function handleSignOut() {
-    removeUserId();
+    token.removeToken();
     setIsLoggedIn(false);
     setCurrentUser(null);
-    navigate("/");
+    navigate("/", { replace: true });
   }
 
   useEffect(() => {
-    const id = token.getToken();
-    if (!id) return;
+    const jwt = token.getToken();
+    if (!jwt) return;
 
-    api.getUserById(id)
+    api.getInfoUser()
       .then((user) => {
         setCurrentUser(user);
         setIsLoggedIn(true);
       })
       .catch((err) => {
         console.log(err);
-        removeUserId();
+        token.removeToken();
         setIsLoggedIn(false);
         setCurrentUser(null);
       });
   }, []);
+
+  const contextValue = useMemo(() => ({
+    isLoggedIn,
+    currentUser,
+    setIsLoggedIn,
+    setCurrentUser,
+    handleSignOut,
+    handleLogin,
+    handleRegistration,
+  }), [isLoggedIn, currentUser]);
 
   return (
     <div className="app">

@@ -1,20 +1,18 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useContext } from "react";
-import { login } from "../../utils/auth";
 import AppContext from "../../context/AppContext";
 
 export default function Login() {
-  const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/catalog";
-  const { handleAuthSuccess } = useContext(AppContext);
+  const from = location.state?.from?.pathname || "/dashboard";
+  const { handleLogin } = useContext(AppContext);
 
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
 
-  const[isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
   const isValid = form.email && form.password;
@@ -27,27 +25,19 @@ export default function Login() {
     }));
   }
 
-  async function handleSubmit(e) {
+
+  function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setIsSubmitting(true);
 
-    try {
-      const user = await login({
-        email: form.email,
-        password: form.password,
+    handleLogin({ email: form.email, password: form.password, from })
+      .catch((err) => {
+        setError(err.message || "No se pudo iniciar sesión");
+      })
+      .finally(() => {
+        setIsSubmitting(false);
       });
-
-      console.log("[LOGIN OK] user:", user);
-
-      handleAuthSuccess(user);
-
-      navigate(from, { replace: true });
-    } catch (err) {
-      setError(err.message || "No se pudo iniciar sesión");
-    } finally {
-      setIsSubmitting(false);
-    }
   }
 
   return (

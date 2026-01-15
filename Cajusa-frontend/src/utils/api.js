@@ -50,10 +50,10 @@ class Api {
     }).then(this._checkResponse);
   }
 
-  getUserById(id) {
+  getInfoUser() {
     this._checkUrl();
 
-    return fetch(`${this._url}/users/${encodeURIComponent(id)}`, {
+    return fetch(`${this._url}/users/me`, {
       headers: this._getHeaders(),
     }).then(this._checkResponse);
   }
