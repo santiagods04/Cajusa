@@ -13,10 +13,12 @@ cleanup() {
   kill -9 "$BACK_PID" 2>/dev/null || true
   kill -9 "$FRONT_PID" 2>/dev/null || true
 }
-trap cleanup INT TERM
+trap cleanup EXIT INT TERM
 
 # Opcional: liberar puertos si quedaron ocupados
-npx --yes kill-port 3000 5173 >/dev/null 2>&1 || true
+if [[ "${KILL_PORTS:-1}" == "1" ]]; then
+  npx --yes kill-port 3000 5173 >/dev/null 2>&1 || true
+fi
 
 # Lanzar backend y frontend en paralelo
 ( cd "$ROOT_DIR/Cajusa-backend"  && npm run dev ) & BACK_PID=$!
