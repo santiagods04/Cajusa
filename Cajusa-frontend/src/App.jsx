@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";
@@ -10,6 +10,7 @@ import Login from "./pages/public/Login";
 import Register from "./pages/public/Register";
 import MyAccount from "./pages/protected/shared/MyAccount";
 import Dashboard from "./pages/protected/shared/Dashboard";
+import Products from "./pages/protected/admin/Products";
 import api from "./utils/api";
 import * as auth from "./utils/auth";
 import * as token from "./utils/token";
@@ -18,9 +19,16 @@ import AppContext from "./context/AppContext";
 
 function App() {
   const navigate = useNavigate();
+  //states user authorization  
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
+  //states products management
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [productsError, setProductsError] = useState('');
+
+  //authorization
   async function handleRegistration(payload) {
     const user = await auth.register(payload);
     navigate("/login");
@@ -54,6 +62,9 @@ function App() {
     setIsLoggedIn(false);
     setCurrentUser(null);
     navigate("/", { replace: true });
+    setProducts([]);
+    setProductsLoading(false);
+    setProductsError('');
   }
 
   useEffect(() => {
@@ -73,7 +84,46 @@ function App() {
       });
   }, []);
 
-  const contextValue = useMemo(() => ({
+  //Products management
+  function onProductsReload() {
+    setProductsLoading(true);
+    setProductsError('');
+
+    return api.getProducts()
+      .then((data) => {
+        setProducts(Array.isArray(data) ? data : []);
+        return data;
+      })
+      .catch((err) => {
+        setProducts([]);
+        setProductsError(err?.message || 'No se pudieron cargar los productos.');
+        throw err;
+      })
+      .finally(() => setProductsLoading(false));
+  }
+
+  function onProductCreate() {
+    navigate('/dashboard/products/new');
+  }
+
+  function onProductEdit(id) {
+    navigate(`/dashboard/products/${id}/edit`);
+  }
+
+  function onProductDelete(id) {
+    setProductsError('');
+
+    return api.deleteProduct(id)
+      .then(() => {
+        setProducts((prev) => prev.filter((p) => p._id !== id));
+      })
+      .catch((err) => {
+        setProductsError(err?.message || 'No se pudo borrar el producto.');
+        throw err;
+      });
+  }
+
+  const contextValue = {
     isLoggedIn,
     currentUser,
     setIsLoggedIn,
@@ -81,7 +131,14 @@ function App() {
     handleSignOut,
     handleLogin,
     handleRegistration,
-  }), [isLoggedIn, currentUser]);
+    products,
+    productsLoading,
+    productsError,
+    onProductsReload,
+    onProductCreate,
+    onProductEdit,
+    onProductDelete,
+  };
 
   return (
     <div className="app">
@@ -108,14 +165,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            {/* <Route
-              path="/admin"
+            <Route
+              path="/dashboard/products"
               element={
                 <ProtectedRoute requiredRole="admin">
-                  <Admin />
+                  <Products />
                 </ProtectedRoute>
               }
-            /> */}
+            />
             <Route
               path="/login"
               element={

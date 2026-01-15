@@ -1,0 +1,228 @@
+.products {
+  padding: 28px 0 60px;
+}
+
+.products__container {
+  width: min(1100px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.products__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.products__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.products__title {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.products__subtitle {
+  margin: 0;
+  opacity: 0.75;
+}
+
+.products__btn {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 14px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.products__btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.products__btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.products__btn_type_create {
+  font-weight: 600;
+}
+
+.products__btn_type_secondary {
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+
+.products__alert {
+  border: 1px solid rgba(210, 40, 40, 0.22);
+  background: rgba(210, 40, 40, 0.06);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+
+.products__content {
+  margin-top: 10px;
+}
+
+.products__empty {
+  border: 1px dashed rgba(0, 0, 0, 0.18);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 18px;
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+}
+
+.products__empty-text {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+.products__table-wrap {
+  overflow-x: auto;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+}
+
+.products__table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 920px;
+}
+
+.products__thead .products__tr {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.products__tr_body:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.products__th,
+.products__td {
+  padding: 14px 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.products__th {
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.products__td_align_right,
+.products__th_align_right {
+  text-align: right;
+}
+
+.products__td_align_center,
+.products__th_align_center {
+  text-align: center;
+}
+
+.products__name-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.products__name {
+  font-weight: 700;
+}
+
+.products__meta {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.products__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.products__actions {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.products__icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.products__icon-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.products__icon-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.products__icon {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  opacity: 0.85;
+}
+
+.products__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+}
+
+.products__count {
+  opacity: 0.7;
+  font-size: 14px;
+}
+
+@media (max-width: 720px) {
+  .products__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .products__btn_type_create {
+    width: 100%;
+  }
+}

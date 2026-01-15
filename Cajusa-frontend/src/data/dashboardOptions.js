@@ -1,7 +1,7 @@
 export const dashboardOptionsByRole = {
   admin: [
-    { title: "Productos", desc: "Crea, edita y administra el catálogo.", to: "/admin/products", icon: "🛠️" },
-    { title: "Registros", desc: "Revisa actividad, errores y eventos.", to: "/admin/logs", icon: "📄" },
+    { title: "Productos", desc: "Crea, edita y administra el catálogo.", to: "/dashboard/products", icon: "🛠️" },
+    { title: "Registros", desc: "Revisa actividad, errores y eventos.", to: "/dashboard/logs", icon: "📄" },
     { title: "Catálogo", desc: "Ver la vista pública del catálogo.", to: "/catalog", icon: "🛒" },
   ],
   user: [
