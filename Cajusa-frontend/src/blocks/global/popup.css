@@ -145,6 +145,7 @@
 .popup__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -152,6 +153,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 
 .popup__field_span_2 {
@@ -178,6 +180,83 @@
   resize: vertical;
   min-height: 90px;
 }
+
+/* Contenedor de miniaturas */
+.popup__thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+/* Caja fija para cada miniatura */
+.popup__thumb {
+  width: 84px;
+  height: 84px;
+  flex: 0 0 auto;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.03);
+}
+
+/* Botón que envuelve la imagen */
+.popup__thumb-btn {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: block;
+}
+
+/* La imagen: SIEMPRE encaja en la caja */
+.popup__thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;   /* o 'contain' si prefieres sin recorte */
+  display: block;
+}
+
+/* Botón de quitar miniatura */
+.popup__thumb-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 5;
+  padding: 0;
+  line-height: 1;
+}
+
+/* La “X” */
+.popup__thumb-remove::before {
+  content: "×";
+  font-size: 18px;
+  font-weight: 700;
+  transform: translateY(-1px);
+}
+
+/* Hover/Focus para que se sienta clickeable */
+.popup__thumb-remove:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.popup__thumb-remove:focus-visible {
+  outline: 2px solid rgba(0,0,0,0.35);
+  outline-offset: 2px;
+}
+
 
 .popup__input:focus,
 .popup__textarea:focus {
@@ -241,11 +320,51 @@
    Image popup helpers (si los usas luego)
    ========================= */
 
+/* La imagen en overlay */
 .popup__image {
   display: block;
-  width: 100%;
+  width: auto;
   height: auto;
-  border-radius: 14px;
+  max-width: 92vw;
+  max-height: 92vh;
+  object-fit: contain;
+}
+
+.popup__image-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup__container_type_image {
+  position: relative;
+
+  /* mata cualquier width fijo heredado */
+  width: auto;
+  min-width: 0;
+
+  /* shrink-to-fit */
+  display: inline-block;
+
+  /* sin padding para que no queden franjas blancas */
+  padding: 0;
+
+  /* límites por pantalla (para imágenes grandes) */
+  max-width: 92vw;
+  max-height: 92vh;
+
+  overflow: hidden; /* importante para bordes redondeados */
+}
+
+.popup__container_type_image .popup__content {
+  padding: 0;
+}
+
+.popup__container_type_image .popup__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
 }
 
 .popup__caption {

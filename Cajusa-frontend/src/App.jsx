@@ -4,7 +4,7 @@ import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";
 import Popup from "./components/Popup/Popup";
-import ImagePopup from "./components/Popup/ImagePopup/ImagePopup";
+import PopupOverlay from "./components/Popup/PopupOverlay";
 import Home from "./pages/public/Home";
 import Catalog from "./pages/public/Catalog";
 import ProductDetail from "./pages/public/ProductDetail";
@@ -145,8 +145,8 @@ function App() {
     setProductSubmitError("");
   }
 
-  function openImagePopup(src) {
-    setOverlayProps({ src });
+  function openImageOverlay(imageUrl) {
+    setOverlayProps({ imageUrl });
     setActiveOverlay("image");
   }
 
@@ -209,7 +209,7 @@ function App() {
     closePopup,
     activeOverlay,
     overlayProps,
-    openImagePopup,
+    openImageOverlay,
     closeOverlay,
     handleProductSubmit,
     productSubmitLoading,
@@ -270,7 +270,7 @@ function App() {
         </main>
 
         <Popup />
-        <ImagePopup />
+        <PopupOverlay />
 
         <Footer />
       </AppContext.Provider>

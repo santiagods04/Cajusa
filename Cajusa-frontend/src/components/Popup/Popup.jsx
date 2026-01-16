@@ -7,6 +7,7 @@ function Popup() {
 
     const {
         activePopup,
+        activeOverlay,
         popupProps,
         closePopup,
         handleProductSubmit,
@@ -20,12 +21,17 @@ function Popup() {
         if (!isOpen) return;
 
         function handleEsc(e) {
-            if (e.key === "Escape") closePopup?.();
+            if (e.key !== 'Escape') return;
+
+            // Si hay overlay encima, no cierres el form
+            if (activeOverlay) return;
+
+            closePopup?.();
         }
 
-        document.addEventListener("keydown", handleEsc);
-        return () => document.removeEventListener("keydown", handleEsc);
-    }, [isOpen, closePopup]);
+        document.addEventListener('keydown', handleEsc);
+        return () => document.removeEventListener('keydown', handleEsc);
+    }, [isOpen, closePopup, activeOverlay]);
 
     function handleOverlayClick(e) {
         if (e.target === e.currentTarget) closePopup?.();
