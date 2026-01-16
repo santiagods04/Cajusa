@@ -10,6 +10,9 @@ const DEFAULT_VALUES = {
     subcategory: '',
     line: '',
     description: '',
+    images: [],
+    newImages: [],
+    variants: [],
 };
 
 function ProductForm({
@@ -22,31 +25,35 @@ function ProductForm({
 
     const { openImageOverlay } = useContext(AppContext);
     const [values, setValues] = useState(DEFAULT_VALUES);
-    const [existingImages, setExistingImages] = useState([]);
-    const [newImages, setNewImages] = useState([]);
+    // const [existingImages, setExistingImages] = useState([]);
+    // const [newImages, setNewImages] = useState([]);
+    const [isVariantFormOpen, setIsVariantFormOpen] = useState(false);
+    const [variantDraft, setVariantDraft] = useState({ size: "", color: "", quantity: 1 });
+    const [variantError, setVariantError] = useState("");
 
     useEffect(() => {
-        setValues({ ...DEFAULT_VALUES, ...(initialValues || {}) });
-
         const imgs = Array.isArray(initialValues?.images)
-            ? initialValues.images.filter((img) => typeof img === 'string')
+            ? initialValues.images.filter((img) => typeof img === "string")
             : [];
-        setExistingImages(imgs);
 
-
-        setNewImages(function clearPrev(prev) {
-            prev.forEach(function (item) {
-                URL.revokeObjectURL(item.url);
-            });
-            return [];
+        setValues({
+            ...DEFAULT_VALUES,
+            ...(initialValues || {}),
+            images: imgs,
+            newImages: [],
+            variants: normalizeVariants(initialValues?.variants),
         });
+
+        setVariantDraft({ size: "", color: "", quantity: 1 });
+        setIsVariantFormOpen(false);
+        setVariantError("");
     }, [initialValues]);
 
     const newImagesRef = useRef([]);
 
     useEffect(() => {
-        newImagesRef.current = newImages;
-    }, [newImages]);
+        newImagesRef.current = values.newImages;
+    }, [values.newImages]);
 
     useEffect(() => {
         return function cleanupOnUnmount() {
@@ -71,36 +78,35 @@ function ProductForm({
         if (!files.length) return;
 
         const mapped = files.map(function (file) {
+            return { file, url: URL.createObjectURL(file) };
+        });
+
+        setValues(function (prev) {
             return {
-                file,
-                url: URL.createObjectURL(file),
+                ...prev,
+                newImages: (prev.newImages || []).concat(mapped),
             };
         });
 
-        setNewImages(function (prev) {
-            return prev.concat(mapped);
-        });
         e.target.value = "";
     }
 
     function removeExistingImage(url) {
-        setExistingImages(function (prev) {
-            return prev.filter(function (u) {
-                return u !== url;
-            });
+        setValues(function (prev) {
+            return {
+                ...prev,
+                images: (prev.images || []).filter((u) => u !== url),
+            };
         });
     }
 
-    function removeNewImage(url) {
-        setNewImages(function (prev) {
-            const found = prev.find(function (i) {
-                return i.url === url;
-            });
-            if (found) URL.revokeObjectURL(found.url);
 
-            return prev.filter(function (i) {
-                return i.url !== url;
-            });
+    function removeNewImage(url) {
+        setValues(function (prev) {
+            return {
+                ...prev,
+                newImages: (prev.newImages || []).filter((i) => i.url !== url),
+            };
         });
     }
 
@@ -109,13 +115,122 @@ function ProductForm({
         if (openImageOverlay) openImageOverlay(url);
     }
 
+    function normalizeVariants(input) {
+        if (!Array.isArray(input)) return [];
+
+        return input
+            .filter((v) => v && typeof v === "object")
+            .map((v) => {
+                const qty =
+                    typeof v.quantity === "number"
+                        ? v.quantity
+                        : (v.available ? 1 : 0);
+
+                return {
+                    _id: v._id,               // si existe (edit)
+                    size: String(v.size || "").trim(),
+                    color: String(v.color || "").trim(),
+                    quantity: Number.isFinite(qty) ? qty : 1,
+                };
+            })
+            .filter((v) => v.size && v.color);
+    }
+
+    function openVariantForm() {
+        setVariantDraft({ size: "", color: "", quantity: 1 });
+        setVariantError("");
+        setIsVariantFormOpen(true);
+    }
+
+    function closeVariantForm() {
+        setVariantError("");
+        setIsVariantFormOpen(false);
+    }
+
+    function handleVariantDraftChange(e) {
+        const { name, value } = e.target;
+
+        setVariantDraft((prev) => {
+            if (name === "quantity") return { ...prev, quantity: Number(value) };
+            return { ...prev, [name]: value };
+        });
+    }
+
+    function saveVariant() {
+        const size = String(variantDraft.size || "").trim();
+        const color = String(variantDraft.color || "").trim();
+        const quantity = Number(variantDraft.quantity);
+
+        if (!size || !color) {
+            setVariantError("Debes ingresar talla y color.");
+            return;
+        }
+
+        if (!Number.isFinite(quantity) || quantity <= 0) {
+            setVariantError("La cantidad debe ser mayor a 0.");
+            return;
+        }
+
+        setVariantError("");
+
+        setValues(function (prev) {
+            const prevVariants = Array.isArray(prev.variants) ? prev.variants : [];
+
+            const idx = prevVariants.findIndex(
+                (v) =>
+                    String(v.size).toLowerCase() === size.toLowerCase()
+                    && String(v.color).toLowerCase() === color.toLowerCase()
+            );
+
+            let nextVariants;
+            if (idx !== -1) {
+                nextVariants = [...prevVariants];
+                nextVariants[idx] = { ...nextVariants[idx], size, color, quantity };
+            } else {
+                nextVariants = prevVariants.concat({ size, color, quantity });
+            }
+
+            return { ...prev, variants: nextVariants };
+        });
+
+        setIsVariantFormOpen(false);
+        setVariantDraft({ size: "", color: "", quantity: 1 });
+    }
+
+    function removeVariant(index) {
+        setValues(function (prev) {
+            const prevVariants = Array.isArray(prev.variants) ? prev.variants : [];
+            return {
+                ...prev,
+                variants: prevVariants.filter((_, i) => i !== index),
+            };
+        });
+    }
+
+
+
     function handleSubmit(e) {
         e.preventDefault();
+        if (!variants.length) {
+            // usa el mismo submitError o crea uno aparte
+            setVariantError("Debes agregar al menos una variante.");
+            return;
+        }
+
+        const variantsPayload = variants.map((v) => ({
+            ...(v._id ? { _id: v._id } : {}),
+            size: v.size,
+            color: v.color,
+            available: v.quantity > 0,
+            // OJO: deja quantity solo si el backend lo soporta.
+            quantity: v.quantity,
+        }));
 
         const payload = {
             ...values,
             price: Number(values.price),
-            images: existingImages
+            images: existingImages,
+            variants: variantsPayload,
         };
 
         const files = newImages.map(function (i) {
@@ -125,8 +240,18 @@ function ProductForm({
         onSubmit?.(payload, files);
     }
 
+    function handleSubmitDemo(e) {
+        e.preventDefault();
+
+        console.log("DEMO submit (no envía nada):", {
+            values,
+        });
+
+        return; // <- corta aquí mientras pruebas UI
+    }
+
     return (
-        <form className="popup__form" onSubmit={handleSubmit} noValidate>
+        <form className="popup__form" onSubmit={handleSubmitDemo} noValidate>
             <div className="popup__grid">
                 <div className="popup__field">
                     <label className="popup__label" htmlFor="code">Código</label>
@@ -203,7 +328,6 @@ function ProductForm({
                     />
                 </div>
 
-
                 <div className="popup__field popup__field_span_2">
                     <label className="popup__label" htmlFor="description">Descripción</label>
                     <textarea
@@ -216,7 +340,7 @@ function ProductForm({
                         rows={4}
                     />
                 </div>
-                {/* --- IMÁGENES: selector --- */}
+
                 <div className="popup__field">
                     <label className="popup__label" htmlFor="product-images">
                         Imágenes del producto
@@ -233,10 +357,9 @@ function ProductForm({
 
                     <p className="popup__hint">JPG, PNG, WEBP… Puedes seleccionar varias.</p>
 
-                    {/* --- previews existentes + nuevas --- */}
-                    {(existingImages.length > 0 || newImages.length > 0) && (
+                    {(values.images.length > 0 || values.newImages.length > 0) && (
                         <div className="popup__thumbs">
-                            {existingImages.map(function (url) {
+                            {values.images.map(function (url) {
                                 return (
                                     <div className="popup__thumb" key={url}>
                                         <button
@@ -261,7 +384,7 @@ function ProductForm({
                                 );
                             })}
 
-                            {newImages.map(function (item) {
+                            {values.newImages.map(function (item) {
                                 return (
                                     <div className="popup__thumb" key={item.url}>
                                         <button
@@ -288,6 +411,81 @@ function ProductForm({
                         </div>
                     )}
                 </div>
+
+                <div className="popup_field popup_field_span_2">
+                    <label className="popup_label">Variantes</label>
+
+                    {values.variants.length > 0 && (
+                        <div className="popup_variants">
+                            {values.variants.map((v, index) => (
+                                <div className="popup_variant" key={`${v.size}-${v.color}-${index}`}>
+                                    <span className="popup_variant-text">
+                                        {v.size} · {v.color} · {v.quantity}
+                                    </span>
+
+                                    <button
+                                        type="button"
+                                        className="popup_variant-remove"
+                                        aria-label="Eliminar variante"
+                                        onClick={() => removeVariant(index)}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {!isVariantFormOpen && (
+                        <button
+                            type="button"
+                            className="popup_variant-add"
+                            onClick={openVariantForm}
+                        >
+                            Agregar variante
+                        </button>
+                    )}
+
+                    {isVariantFormOpen && (
+                        <div className="popup_variant-form">
+                            <input
+                                className="popup_input"
+                                name="size"
+                                placeholder="Talla (S, M, L...)"
+                                value={variantDraft.size}
+                                onChange={handleVariantDraftChange}
+                            />
+
+                            <input
+                                className="popup_input"
+                                name="color"
+                                placeholder="Color"
+                                value={variantDraft.color}
+                                onChange={handleVariantDraftChange}
+                            />
+
+                            <input
+                                className="popup_input"
+                                name="quantity"
+                                type="number"
+                                min="1"
+                                placeholder="Cantidad"
+                                value={variantDraft.quantity}
+                                onChange={handleVariantDraftChange}
+                            />
+
+                            <div className="popup_variant-actions">
+                                <button type="button" className="popup_variant-save" onClick={saveVariant}>
+                                    Guardar variante
+                                </button>
+                                <button type="button" className="popup_variant-cancel" onClick={closeVariantForm}>
+                                    Cancelar
+                                </button>
+                            </div>
+
+                            {variantError && <p className="popup_error">{variantError}</p>}
+                        </div>
+                    )}
+                </div>
+
             </div>
 
             <div className="popup__actions">
