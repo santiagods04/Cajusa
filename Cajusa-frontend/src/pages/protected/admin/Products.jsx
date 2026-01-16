@@ -18,8 +18,8 @@ export default function Products() {
         productsLoading,
         productsError,
         onProductsReload,
-        onProductCreate,
-        onProductEdit,
+        openCreateProductPopup,
+        openEditProductPopup,
         onProductDelete,
     } = useContext(AppContext);
 
@@ -33,11 +33,11 @@ export default function Products() {
     const rows = useMemo(() => (Array.isArray(products) ? products : []), [products]);
 
     const handleCreate = () => {
-        if (onProductCreate) onProductCreate();
+        openCreateProductPopup?.();
     };
 
-    const handleEdit = (productId) => {
-        if (onProductEdit) onProductEdit(productId);
+    const handleEdit = (product) => {
+        openEditProductPopup?.(product);
     };
 
     const handleDelete = (productId, productName) => {

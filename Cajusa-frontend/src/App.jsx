@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";
+import Popup from "./components/Popup/Popup";
+import ImagePopup from "./components/Popup/ImagePopup/ImagePopup";
 import Home from "./pages/public/Home";
 import Catalog from "./pages/public/Catalog";
 import ProductDetail from "./pages/public/ProductDetail";
@@ -27,6 +29,14 @@ function App() {
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState('');
+
+  // popup state
+  const [productSubmitLoading, setProductSubmitLoading] = useState(false);
+  const [productSubmitError, setProductSubmitError] = useState('');
+  const [activePopup, setActivePopup] = useState(null);
+  const [popupProps, setPopupProps] = useState({});
+  const [activeOverlay, setActiveOverlay] = useState(null);
+  const [overlayProps, setOverlayProps] = useState({});
 
   //authorization
   async function handleRegistration(payload) {
@@ -102,14 +112,6 @@ function App() {
       .finally(() => setProductsLoading(false));
   }
 
-  function onProductCreate() {
-    navigate('/dashboard/products/new');
-  }
-
-  function onProductEdit(id) {
-    navigate(`/dashboard/products/${id}/edit`);
-  }
-
   function onProductDelete(id) {
     setProductsError('');
 
@@ -123,6 +125,70 @@ function App() {
       });
   }
 
+
+
+  function openCreateProductPopup() {
+    setPopupProps({ mode: "create", product: null });
+    setActivePopup("product-form");
+    setProductSubmitError('');
+  }
+
+  function openEditProductPopup(product) {
+    setPopupProps({ mode: "edit", product });
+    setActivePopup("product-form");
+    setProductSubmitError('');
+  }
+
+  function closePopup() {
+    setActivePopup(null);
+    setPopupProps({});
+    setProductSubmitError("");
+  }
+
+  function openImagePopup(src) {
+    setOverlayProps({ src });
+    setActiveOverlay("image");
+  }
+
+  function closeOverlay() {
+    setActiveOverlay(null);
+    setOverlayProps({});
+  }
+
+  function handleProductSubmit(payload) {
+    setProductSubmitLoading(true);
+    setProductSubmitError('');
+
+    if (popupProps?.mode === "create") {
+      return api.createProduct(payload)
+        .then((created) => {
+          setProducts((prev) => [created, ...prev]);
+          closePopup();
+          return created;
+        })
+        .catch((err) => {
+          setProductSubmitError(err?.message || 'No se pudo crear el producto.');
+          throw err;
+        })
+        .finally(() => setProductSubmitLoading(false));
+    }
+
+    // edit
+    const id = popupProps?.product?._id;
+    return api.updateProduct(id, payload)
+      .then((updated) => {
+        setProducts((prev) => prev.map((p) => (p._id === updated._id ? updated : p)));
+        closePopup();
+        return updated;
+      })
+      .catch((err) => {
+        setProductSubmitError(err?.message || 'No se pudo actualizar el producto.');
+        throw err;
+      })
+      .finally(() => setProductSubmitLoading(false));
+  }
+
+
   const contextValue = {
     isLoggedIn,
     currentUser,
@@ -135,9 +201,19 @@ function App() {
     productsLoading,
     productsError,
     onProductsReload,
-    onProductCreate,
-    onProductEdit,
     onProductDelete,
+    activePopup,
+    popupProps,
+    openCreateProductPopup,
+    openEditProductPopup,
+    closePopup,
+    activeOverlay,
+    overlayProps,
+    openImagePopup,
+    closeOverlay,
+    handleProductSubmit,
+    productSubmitLoading,
+    productSubmitError,
   };
 
   return (
@@ -192,6 +268,10 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
+
+        <Popup />
+        <ImagePopup />
+
         <Footer />
       </AppContext.Provider>
     </div>
