@@ -67,7 +67,7 @@ const validateCreateProduct = celebrate({
 
     name: Joi.string().min(2).max(120).required(),
     price: Joi.number().min(0).required(),
-    description: Joi.string().max(2000).required(),
+    description: Joi.string().max(600).required(),
 
     images: Joi.array().items(Joi.string().min(1)).max(6).optional(),
     variants: Joi.array().items(variantJoi).optional(),
@@ -83,7 +83,7 @@ const validateUpdateProduct = celebrate({
 
     name: Joi.string().min(2).max(120).optional(),
     price: Joi.number().min(0).optional(),
-    description: Joi.string().max(2000).optional(),
+    description: Joi.string().max(600).optional(),
 
     images: Joi.array().items(Joi.string().min(1)).max(6).optional(),
     variants: Joi.array().items(variantJoi).optional(),

@@ -24,53 +24,218 @@ function ProductForm({
     submitError = "",
 }) {
 
+    const FIELDS = [
+        "code",
+        "name",
+        "line",
+        "category",
+        "subcategory",
+        "price",
+        "description",
+        "images",
+        "variants",
+        "tags",
+    ];
+
+    const EMPTY_ERRORS = Object.fromEntries(FIELDS.map((k) => [k, ""]));
+    const EMPTY_TOUCHED = Object.fromEntries(FIELDS.map((k) => [k, false]));
+
     const { openImageOverlay } = useContext(AppContext);
     const [values, setValues] = useState(DEFAULT_VALUES);
-    const [imageError, setImageError] = useState("");
+    const [errors, setErrors] = useState(EMPTY_ERRORS);
+    const [touched, setTouched] = useState(EMPTY_TOUCHED);
     const [isVariantFormOpen, setIsVariantFormOpen] = useState(false);
     const [variantDraft, setVariantDraft] = useState({ size: "", color: "", quantity: 1 });
-    const [variantError, setVariantError] = useState("");
     const [isTagFormOpen, setIsTagFormOpen] = useState(false);
     const [tagDraft, setTagDraft] = useState("");
-    const [tagError, setTagError] = useState("");
+
+    function setFieldError(field, message) {
+        setErrors((prev) => ({ ...prev, [field]: message }));
+    }
+
+    function touchField(field) {
+        setTouched((prev) => ({ ...prev, [field]: true }));
+    }
+
+    const MAX_FILES = 6;
+    const MAX_SIZE = 1.5 * 1024 * 1024; // 1.5MB
+
+    function validateField(field, value, allValues) {
+        const v = typeof value === "string" ? value.trim() : value;
+
+        switch (field) {
+            case "code": {
+                if (!v) return "El código es obligatorio.";
+                if (v.length < 3) return "El código debe tener mínimo 3 caracteres.";
+                if (v.length > 60) return "El código no puede superar 60 caracteres.";
+                return "";
+            }
+
+            case "name": {
+                if (!v) return "El nombre es obligatorio.";
+                if (v.length < 2) return "El nombre debe tener mínimo 2 caracteres.";
+                if (v.length > 120) return "El nombre no puede superar 120 caracteres.";
+                return "";
+            }
+
+            case "line":
+            case "category": {
+                if (!v) return "Este campo es obligatorio.";
+                if (v.length < 2) return "Debe tener mínimo 2 caracteres.";
+                if (v.length > 60) return "No puede superar 60 caracteres.";
+                return "";
+            }
+
+            case "subcategory": {
+                if (!v) return "La subcategoría es obligatoria.";
+                if (v.length > 60) return "No puede superar 60 caracteres.";
+                return "";
+            }
+
+            case "price": {
+                const n = Number(value);
+                if (value === "" || value === null || value === undefined) return "El precio es obligatorio.";
+                if (Number.isNaN(n)) return "El precio debe ser un número.";
+                if (n < 0) return "El precio no puede ser negativo.";
+                return "";
+            }
+
+            case "description": {
+                if (!v) return "Este campo es obligatorio.";
+                if (v && v.length > 600) return "La descripción no puede superar 600 caracteres.";
+                return "";
+            }
+
+            case "images": {
+                const existingCount = Array.isArray(allValues.images) ? allValues.images.length : 0;
+                const newImgs = Array.isArray(allValues.newImages) ? allValues.newImages : [];
+                const newCount = newImgs.length;
+                const total = existingCount + newCount;
+
+                if (total <= 0) return "Debes subir al menos 1 imagen.";
+                if (total > MAX_FILES) return `Máximo ${MAX_FILES} imágenes por producto.`;
+
+                // Validar type y size SOLO para las nuevas (las existentes son URLs/string)
+                const newFiles = newImgs.map((x) => x && x.file).filter(Boolean);
+
+                const invalidType = newFiles.find((f) => !String(f.type || "").startsWith("image/"));
+                if (invalidType) return `El archivo "${invalidType.name}" no es una imagen válida.`;
+
+                const tooBig = newFiles.find((f) => f.size > MAX_SIZE);
+                if (tooBig) {
+                    const mb = (tooBig.size / 1024 / 1024).toFixed(2);
+                    return `Cada imagen debe pesar máximo 1.5MB. "${tooBig.name}" pesa ${mb}MB.`;
+                }
+
+                return "";
+            }
+
+            case "variants": {
+                const count = (allValues.variants || []).length;
+                if (count <= 0) return "Agrega al menos 1 variante.";
+                return "";
+            }
+
+            case "tags": {
+                const count = (allValues.tags || []).length;
+                if (count > 40) return "Máximo 40 tags.";
+                return "";
+            }
+
+            default:
+                return "";
+        }
+    }
+
+    function handleBlur(e) {
+        const { name, value } = e.target;
+        touchField(name);
+        setFieldError(name, validateField(name, value, values));
+    }
 
     function handleChange(e) {
-        const name = e.target.name;
-        const value = e.target.value;
+        const { name, value } = e.target;
 
-        setValues(function (prev) {
-            return { ...prev, [name]: value };
+        setValues((prev) => {
+            const next = { ...prev, [name]: value };
+
+            if (touched[name]) {
+                setFieldError(name, validateField(name, value, next));
+            }
+
+            return next;
         });
     }
 
-    function handleFilesChange(e) {
-        setImageError("");
+    function validateAll(allValues) {
+        const nextErrors = { ...EMPTY_ERRORS };
 
+        FIELDS.forEach((field) => {
+            const value = allValues[field];
+            nextErrors[field] = validateField(field, value, allValues);
+        });
+
+        setErrors(nextErrors);
+
+        const hasErrors = Object.values(nextErrors).some(Boolean);
+        if (hasErrors) {
+            setTouched(Object.fromEntries(FIELDS.map((k) => [k, true])));
+        }
+
+        return !hasErrors;
+    }
+
+
+
+    function validateFiles(files, currentTotal) {
+        if (currentTotal + files.length > MAX_FILES) {
+            const remaining = Math.max(0, MAX_FILES - currentTotal);
+            return `Máximo ${MAX_FILES} imágenes. Solo puedes agregar ${remaining} más.`;
+        }
+
+        const invalidType = files.find((f) => !String(f.type || "").startsWith("image/"));
+        if (invalidType) {
+            return `El archivo "${invalidType.name}" no es una imagen válida.`;
+        }
+
+        const tooBig = files.find((f) => f.size > MAX_SIZE);
+        if (tooBig) {
+            return `Cada imagen debe pesar máximo 1.5MB. "${tooBig.name}" pesa ${(tooBig.size / 1024 / 1024).toFixed(2)}MB.`;
+        }
+
+        return "";
+    }
+
+    function handleFilesChange(e) {
         const files = Array.from(e.target.files || []);
         if (!files.length) return;
 
-        // OJO: cuenta lo que ya tienes (images existentes + newImages)
-        const currentTotal =
-            (values.images ? values.images.length : 0) +
-            (values.newImages ? values.newImages.length : 0);
+        // Previsualización
+        const mapped = files.map((file) => ({
+            file,
+            url: URL.createObjectURL(file),
+        }));
 
-        const errorMsg = validateFiles(files, currentTotal);
+        // Armamos cómo quedaría el estado si agregamos esto
+        const nextValues = {
+            ...values,
+            newImages: (values.newImages || []).concat(mapped),
+        };
+
+        const errorMsg = validateField("images", null, nextValues);
+
         if (errorMsg) {
-            setImageError(errorMsg);
-            e.target.value = ""; 
+            // IMPORTANTE: revocar URLs para no filtrar memoria
+            mapped.forEach((m) => URL.revokeObjectURL(m.url));
+
+            setErrors((prev) => ({ ...prev, images: errorMsg }));
+            e.target.value = "";
             return;
         }
 
-        const mapped = files.map(function (file) {
-            return { file, url: URL.createObjectURL(file) };
-        });
-
-        setValues(function (prev) {
-            return {
-                ...prev,
-                newImages: (prev.newImages || []).concat(mapped),
-            };
-        });
+        // OK: guardamos
+        setErrors((prev) => ({ ...prev, images: "" }));
+        setValues(nextValues);
 
         e.target.value = "";
     }
@@ -83,7 +248,6 @@ function ProductForm({
             };
         });
     }
-
 
     function removeNewImage(url) {
         setValues(function (prev) {
@@ -295,10 +459,10 @@ function ProductForm({
 
         setVariantDraft({ size: "", color: "", quantity: 1 });
         setIsVariantFormOpen(false);
-        setVariantError("");
         setIsTagFormOpen(false);
         setTagDraft('');
-        setTagError('');
+        setErrors(EMPTY_ERRORS);
+        setTouched(EMPTY_TOUCHED);
     }, [initialValues]);
 
     const newImagesRef = useRef([]);
@@ -314,28 +478,6 @@ function ProductForm({
             });
         };
     }, []);
-
-    const MAX_FILES = 6;
-    const MAX_SIZE = 1.5 * 1024 * 1024; // 1.5MB
-
-    function validateFiles(files, currentTotal) {
-        if (currentTotal + files.length > MAX_FILES) {
-            const remaining = Math.max(0, MAX_FILES - currentTotal);
-            return `Máximo ${MAX_FILES} imágenes. Solo puedes agregar ${remaining} más.`;
-        }
-
-        const invalidType = files.find((f) => !String(f.type || "").startsWith("image/"));
-        if (invalidType) {
-            return `El archivo "${invalidType.name}" no es una imagen válida.`;
-        }
-
-        const tooBig = files.find((f) => f.size > MAX_SIZE);
-        if (tooBig) {
-            return `Cada imagen debe pesar máximo 1.5MB. "${tooBig.name}" pesa ${(tooBig.size / 1024 / 1024).toFixed(2)}MB.`;
-        }
-
-        return "";
-    }
 
     function fileToBase64(file) {
         return new Promise(function (resolve, reject) {
@@ -375,6 +517,10 @@ function ProductForm({
 
     async function handleSubmit(e) {
         e.preventDefault();
+
+        const ok = validateAll(values);
+        if (!ok) return;
+
         const payload = await buildPayload(values);
         onSubmit(payload);
     }
@@ -390,9 +536,11 @@ function ProductForm({
                         name="code"
                         value={values.code}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         placeholder="un-001/ln-001"
                         required
                     />
+                    {touched.code && errors.code && <p className="popup__error">{errors.code}</p>}
                 </div>
 
                 <div className="popup__field">
@@ -403,9 +551,11 @@ function ProductForm({
                         name="name"
                         value={values.name}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         placeholder="Nombre del producto"
                         required
                     />
+                    {touched.name && errors.name && <p className="popup__error">{errors.name}</p>}
                 </div>
 
                 <div className="popup__field">
@@ -416,10 +566,12 @@ function ProductForm({
                         name="price"
                         value={values.price}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         placeholder="120000"
                         inputMode="numeric"
                         required
                     />
+                    {touched.price && errors.price && <p className="popup__error">{errors.price}</p>}
                 </div>
 
                 <div className="popup__field">
@@ -430,9 +582,11 @@ function ProductForm({
                         name="line"
                         value={values.line}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         placeholder="Antifluido/Lino"
                         required
                     />
+                    {touched.line && errors.line && <p className="popup__error">{errors.line}</p>}
                 </div>
 
                 <div className="popup__field">
@@ -443,9 +597,11 @@ function ProductForm({
                         name="category"
                         value={values.category}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         placeholder="Uniforme/Blusa/Camisa..."
                         required
                     />
+                    {touched.category && errors.category && <p className="popup__error">{errors.category}</p>}
                 </div>
 
                 <div className="popup__field">
@@ -456,9 +612,11 @@ function ProductForm({
                         name="subcategory"
                         value={values.subcategory}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         placeholder="Salud/Veterinaria/Casual..."
                         required
                     />
+                    {touched.subcategory && errors.subcategory && <p className="popup__error">{errors.subcategory}</p>}
                 </div>
 
                 <div className="popup__field popup__field_span_2">
@@ -469,10 +627,12 @@ function ProductForm({
                         name="description"
                         value={values.description}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         placeholder="Describe el producto..."
                         rows={4}
                         required
                     />
+                    {touched.description && errors.description && <p className="popup__error">{errors.description}</p>}
                 </div>
 
                 <div className="popup__field">
@@ -488,9 +648,9 @@ function ProductForm({
                             accept="image/*"
                             multiple
                             onChange={handleFilesChange}
+                            aria-describedby="image-help"
                             required
                         />
-
                         <label className="popup__btn" htmlFor="product-images">
                             Elegir archivos
                         </label>
@@ -501,7 +661,6 @@ function ProductForm({
                                 : "Ningún archivo seleccionado"}
                         </span>
                     </div>
-
                     <p className="popup__hint">JPG, PNG, WEBP… Puedes seleccionar varias.</p>
 
                     {(values.images.length > 0 || values.newImages.length > 0) && (
@@ -549,9 +708,9 @@ function ProductForm({
                                     </div>
                                 );
                             })}
-                        </div>                      
+                        </div>
                     )}
-                    {imageError && <p className="popup__error">{imageError}</p>}
+                    {touched.images && errors.images && <p className="popup__error">{errors.images}</p>}
                 </div>
 
                 <div className="popup__field">
@@ -626,7 +785,7 @@ function ProductForm({
                                 </button>
                             </div>
 
-                            {variantError && <p className="popup__error">{variantError}</p>}
+                            {touched.variants && errors.variants && <p className="popup__error">{errors.variants}</p>}
                         </div>
                     )}
                 </div>
@@ -690,7 +849,7 @@ function ProductForm({
                                 </button>
                             </div>
 
-                            {tagError && <p className="popup__error">{tagError}</p>}
+                            {touched.tags && errors.tags && <p className="popup__error">{errors.tags}</p>}
                         </div>
                     )}
                 </div>

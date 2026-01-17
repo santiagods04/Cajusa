@@ -40,7 +40,7 @@ const productSchema = new mongoose.Schema(
     },
     price: { type: Number, required: true, min: 0 },
 
-    description: { type: String, required: true, trim: true, maxlength: 2000 },
+    description: { type: String, required: true, trim: true, maxlength: 600 },
 
     images: { type: [{ type: String, trim: true }], default: [] },
     variants: { type: [variantSchema], default: [] },
