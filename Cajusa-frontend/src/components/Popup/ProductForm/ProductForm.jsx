@@ -178,6 +178,21 @@ function ProductForm({
         });
     }
 
+    function openTagForm() {
+        setIsTagFormOpen(true);
+        setTagError("");
+    }
+
+    function closeTagForm() {
+        setIsTagFormOpen(false);
+        setTagDraft("");
+        setTagError("");
+    }
+
+    function handleTagDraftChange(e) {
+        setTagDraft(e.target.value);
+    }
+
     const MAX_TAGS = 10;
 
     function normalizeTag(raw) {
@@ -199,6 +214,7 @@ function ProductForm({
     }
 
     function addTag(raw) {
+        const rawValue = raw && raw.target ? undefined : raw;
         const text = normalizeTag(raw ?? tagDraft);
 
         if (!text) {
@@ -223,7 +239,7 @@ function ProductForm({
             return { ...prev, tags: current.concat(text) };
         });
 
-        setTagDraft("");
+        closeTagForm();
     }
 
     function removeTag(index) {
@@ -571,7 +587,11 @@ function ProductForm({
                 </div>
 
                 <div className="popup__field">
-                    <label className="popup__label" htmlFor="product-tags">Tags</label>
+                    {isTagFormOpen ? (
+                        <label className="popup__label" htmlFor="product-tags">Tags</label>
+                    ) : (
+                        <span className="popup__label">Tags</span>
+                    )}
 
                     {values.tags?.length > 0 && (
                         <div className="popup__chips">
@@ -590,28 +610,43 @@ function ProductForm({
                         </div>
                     )}
 
-                    <div className="popup__tag-row">
-                        <input
-                            id="product-tags"
-                            className="popup__input"
-                            type="text"
-                            placeholder="Ej: antifluido"
-                            value={tagDraft}
-                            onChange={(e) => setTagDraft(e.target.value)}
-                            onKeyDown={handleTagKeyDown}
-                            onPaste={handleTagPaste}
-                        />
-
+                    {!isTagFormOpen && (
                         <button
                             type="button"
-                            className="popup__btn"
-                            onClick={() => addTag()}
+                            className="popup__btn popup__tag-add"
+                            onClick={openTagForm}
                         >
                             Agregar Tag
                         </button>
-                    </div>
+                    )}
 
-                    {tagError && <p className="popup__error">{tagError}</p>}
+                    {isTagFormOpen && (
+                        <div className="popup__tag-form">
+                            <input
+                                id="product-tags"
+                                className="popup__input"
+                                type="text"
+                                placeholder="Ej: antifluido"
+                                value={tagDraft}
+                                onChange={handleTagDraftChange}
+                                onKeyDown={handleTagKeyDown}
+                                onPaste={handleTagPaste}
+                                autoFocus
+                            />
+
+                            <div className="popup__tag-actions">
+                                <button type="button" className="popup__btn" onClick={() => addTag()}>
+                                    Guardar Tag
+                                </button>
+
+                                <button type="button" className="popup__btn" onClick={closeTagForm}>
+                                    Cancelar
+                                </button>
+                            </div>
+
+                            {tagError && <p className="popup__error">{tagError}</p>}
+                        </div>
+                    )}
                 </div>
 
             </div>

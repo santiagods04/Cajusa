@@ -494,6 +494,20 @@
 /* =========================
    Tags
    ========================= */
+.popup__tag-add {
+  margin-top: 10px;
+}
+
+.popup__tag-form {
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.popup__tag-actions {
+  display: flex;
+  gap: 10px;
+}
 .popup__chips {
   display: flex;
   flex-wrap: wrap;

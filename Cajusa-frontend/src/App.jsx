@@ -125,8 +125,6 @@ function App() {
       });
   }
 
-
-
   function openCreateProductPopup() {
     setPopupProps({ mode: "create", product: null });
     setActivePopup("product-form");
