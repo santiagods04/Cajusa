@@ -302,49 +302,50 @@ function ProductForm({
         };
     }, []);
 
-
-    function handleSubmit(e) {
-        e.preventDefault();
-        if (!variants.length) {
-            setVariantError("Debes agregar al menos una variante.");
-            return;
-        }
-
-        const variantsPayload = variants.map((v) => ({
-            ...(v._id ? { _id: v._id } : {}),
-            size: v.size,
-            color: v.color,
-            available: v.quantity > 0,
-            // OJO: aun no lo soporto en back
-            quantity: v.quantity,
-        }));
-
-        const payload = {
-            ...values,
-            price: Number(values.price),
-            images: existingImages,
-            variants: variantsPayload,
-        };
-
-        const files = newImages.map(function (i) {
-            return i.file;
+    function fileToBase64(file) {
+        return new Promise(function (resolve, reject) {
+            const reader = new FileReader();
+            reader.onload = function () { resolve(reader.result); };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
         });
-
-        onSubmit?.(payload, files);
     }
 
-    function handleSubmitDemo(e) {
+    async function buildPayload(values) {
+        const newImagesBase64 = await Promise.all(
+            (values.newImages || []).map(function (img) {
+                return fileToBase64(img.file);
+            })
+        );
+
+        return {
+            code: values.code,
+            line: values.line,
+            category: values.category,
+            subcategory: values.subcategory,
+            name: values.name,
+            price: Number(values.price),
+            description: values.description,
+            images: (values.images || []).concat(newImagesBase64),
+            variants: values.variants.map(function (v) {
+                return {
+                    size: v.size,
+                    color: v.color,
+                    quantity: Number(v.quantity),
+                };
+            }),
+            tags: values.tags,
+        };
+    }
+
+    async function handleSubmit(e) {
         e.preventDefault();
-
-        console.log("DEMO submit (no envía nada):", {
-            values,
-        });
-
-        return;
+        const payload = await buildPayload(values);
+        createProduct(payload);
     }
 
     return (
-        <form className="popup__form" onSubmit={handleSubmitDemo} noValidate>
+        <form className="popup__form" onSubmit={handleSubmit} noValidate>
             <div className="popup__grid">
                 <div className="popup__field">
                     <label className="popup__label" htmlFor="code">Código</label>
@@ -355,6 +356,7 @@ function ProductForm({
                         value={values.code}
                         onChange={handleChange}
                         placeholder="CAJ-001"
+                        required
                     />
                 </div>
 
@@ -394,6 +396,7 @@ function ProductForm({
                         value={values.line}
                         onChange={handleChange}
                         placeholder="Antifluido/Lino"
+                        required
                     />
                 </div>
 
@@ -406,6 +409,7 @@ function ProductForm({
                         value={values.category}
                         onChange={handleChange}
                         placeholder="Antifluido"
+                        required
                     />
                 </div>
 
@@ -418,6 +422,7 @@ function ProductForm({
                         value={values.subcategory}
                         onChange={handleChange}
                         placeholder="Uniformes"
+                        required
                     />
                 </div>
 
@@ -431,6 +436,7 @@ function ProductForm({
                         onChange={handleChange}
                         placeholder="Describe el producto..."
                         rows={4}
+                        required
                     />
                 </div>
 
@@ -447,6 +453,7 @@ function ProductForm({
                             accept="image/*"
                             multiple
                             onChange={handleFilesChange}
+                            required
                         />
 
                         <label className="popup__btn" htmlFor="product-images">
@@ -511,7 +518,6 @@ function ProductForm({
                     )}
                 </div>
 
-
                 <div className="popup__field">
                     <label className="popup__label">Variantes</label>
 
@@ -552,6 +558,7 @@ function ProductForm({
                                 placeholder="Talla (S, M, L...)"
                                 value={variantDraft.size}
                                 onChange={handleVariantDraftChange}
+                                required
                             />
 
                             <input
@@ -560,6 +567,7 @@ function ProductForm({
                                 placeholder="Color"
                                 value={variantDraft.color}
                                 onChange={handleVariantDraftChange}
+                                required
                             />
 
                             <input
@@ -570,6 +578,7 @@ function ProductForm({
                                 placeholder="Cantidad"
                                 value={variantDraft.quantity}
                                 onChange={handleVariantDraftChange}
+                                required
                             />
 
                             <div className="popup__variant-actions">
@@ -632,6 +641,7 @@ function ProductForm({
                                 onKeyDown={handleTagKeyDown}
                                 onPaste={handleTagPaste}
                                 autoFocus
+                                required
                             />
 
                             <div className="popup__tag-actions">

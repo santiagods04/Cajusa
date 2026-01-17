@@ -53,21 +53,21 @@ const validateProductId = celebrate({
 });
 
 const variantJoi = Joi.object().keys({
-  size: Joi.string().optional().allow(''),
-  color: Joi.string().optional().allow(''),
-  available: Joi.boolean().optional(),
-});
+  size: Joi.string().min(1).max(20).required(),
+  color: Joi.string().min(1).max(30).required(),
+  quantity: Joi.number().integer().min(0).required(),
+}).unknown(false);
 
 const validateCreateProduct = celebrate({
   body: Joi.object().keys({
     code: Joi.string().min(3).max(60).required(),
     line: Joi.string().min(2).max(60).required(),
     category: Joi.string().min(2).max(60).required(),
-    subcategory: Joi.string().max(60).optional().allow(''),
+    subcategory: Joi.string().min(2).max(60).required(),
 
     name: Joi.string().min(2).max(120).required(),
     price: Joi.number().min(0).required(),
-    description: Joi.string().max(2000).optional().allow(''),
+    description: Joi.string().max(2000).required(),
 
     images: Joi.array().items(Joi.string().min(1)).optional(),
     variants: Joi.array().items(variantJoi).optional(),
@@ -79,11 +79,11 @@ const validateUpdateProduct = celebrate({
   body: Joi.object().keys({
     line: Joi.string().min(2).max(60).optional(),
     category: Joi.string().min(2).max(60).optional(),
-    subcategory: Joi.string().max(60).optional().allow(''),
+    subcategory: Joi.string().min(2).max(60).optional(),
 
     name: Joi.string().min(2).max(120).optional(),
     price: Joi.number().min(0).optional(),
-    description: Joi.string().max(2000).optional().allow(''),
+    description: Joi.string().max(2000).optional(),
 
     images: Joi.array().items(Joi.string().min(1)).optional(),
     variants: Joi.array().items(variantJoi).optional(),
