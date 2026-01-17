@@ -341,7 +341,7 @@ function ProductForm({
     async function handleSubmit(e) {
         e.preventDefault();
         const payload = await buildPayload(values);
-        createProduct(payload);
+        onSubmit(payload);
     }
 
     return (

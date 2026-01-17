@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
+  padding: 16px;
   /* estado cerrado */
   opacity: 0;
   visibility: hidden;
@@ -54,6 +54,30 @@
 /* variantes */
 .popup__container_type_form {
   width: min(760px, calc(100% - 32px));
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.popup__container_type_form .popup__content {
+  flex: 1 1 auto;
+  min-height: 0;          /* clave en flex para que sí pueda encoger */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: 16px;   /* evita que lo último quede tapado */
+}
+
+.popup__container_type_form .popup__form {
+  min-height: 0;
+}
+
+.popup__container_type_form .popup__actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  padding-top: 12px;
+  margin-top: 12px;
 }
 
 .popup__container_type_tooltip {
@@ -349,6 +373,9 @@
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
+  align-self: flex-end;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .popup__submit,
@@ -396,7 +423,7 @@
 }
 
 /* =========================
-   Image popup helpers (si los usas luego)
+   Image popup overlay helpers (si los usas luego)
    ========================= */
 
 /* La imagen en overlay */
