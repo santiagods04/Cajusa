@@ -26,8 +26,7 @@ function ProductForm({
 
     const { openImageOverlay } = useContext(AppContext);
     const [values, setValues] = useState(DEFAULT_VALUES);
-    // const [existingImages, setExistingImages] = useState([]);
-    // const [newImages, setNewImages] = useState([]);
+    const [imageError, setImageError] = useState("");
     const [isVariantFormOpen, setIsVariantFormOpen] = useState(false);
     const [variantDraft, setVariantDraft] = useState({ size: "", color: "", quantity: 1 });
     const [variantError, setVariantError] = useState("");
@@ -45,8 +44,22 @@ function ProductForm({
     }
 
     function handleFilesChange(e) {
+        setImageError("");
+
         const files = Array.from(e.target.files || []);
         if (!files.length) return;
+
+        // OJO: cuenta lo que ya tienes (images existentes + newImages)
+        const currentTotal =
+            (values.images ? values.images.length : 0) +
+            (values.newImages ? values.newImages.length : 0);
+
+        const errorMsg = validateFiles(files, currentTotal);
+        if (errorMsg) {
+            setImageError(errorMsg);
+            e.target.value = ""; 
+            return;
+        }
 
         const mapped = files.map(function (file) {
             return { file, url: URL.createObjectURL(file) };
@@ -302,6 +315,28 @@ function ProductForm({
         };
     }, []);
 
+    const MAX_FILES = 6;
+    const MAX_SIZE = 1.5 * 1024 * 1024; // 1.5MB
+
+    function validateFiles(files, currentTotal) {
+        if (currentTotal + files.length > MAX_FILES) {
+            const remaining = Math.max(0, MAX_FILES - currentTotal);
+            return `Máximo ${MAX_FILES} imágenes. Solo puedes agregar ${remaining} más.`;
+        }
+
+        const invalidType = files.find((f) => !String(f.type || "").startsWith("image/"));
+        if (invalidType) {
+            return `El archivo "${invalidType.name}" no es una imagen válida.`;
+        }
+
+        const tooBig = files.find((f) => f.size > MAX_SIZE);
+        if (tooBig) {
+            return `Cada imagen debe pesar máximo 1.5MB. "${tooBig.name}" pesa ${(tooBig.size / 1024 / 1024).toFixed(2)}MB.`;
+        }
+
+        return "";
+    }
+
     function fileToBase64(file) {
         return new Promise(function (resolve, reject) {
             const reader = new FileReader();
@@ -355,7 +390,7 @@ function ProductForm({
                         name="code"
                         value={values.code}
                         onChange={handleChange}
-                        placeholder="CAJ-001"
+                        placeholder="un-001/ln-001"
                         required
                     />
                 </div>
@@ -374,7 +409,7 @@ function ProductForm({
                 </div>
 
                 <div className="popup__field">
-                    <label className="popup__label" htmlFor="price">Precio</label>
+                    <label className="popup__label" htmlFor="price">Precio en COP</label>
                     <input
                         className="popup__input"
                         id="price"
@@ -408,7 +443,7 @@ function ProductForm({
                         name="category"
                         value={values.category}
                         onChange={handleChange}
-                        placeholder="Antifluido"
+                        placeholder="Uniforme/Blusa/Camisa..."
                         required
                     />
                 </div>
@@ -421,7 +456,7 @@ function ProductForm({
                         name="subcategory"
                         value={values.subcategory}
                         onChange={handleChange}
-                        placeholder="Uniformes"
+                        placeholder="Salud/Veterinaria/Casual..."
                         required
                     />
                 </div>
@@ -514,8 +549,9 @@ function ProductForm({
                                     </div>
                                 );
                             })}
-                        </div>
+                        </div>                      
                     )}
+                    {imageError && <p className="popup__error">{imageError}</p>}
                 </div>
 
                 <div className="popup__field">

@@ -69,7 +69,7 @@ const validateCreateProduct = celebrate({
     price: Joi.number().min(0).required(),
     description: Joi.string().max(2000).required(),
 
-    images: Joi.array().items(Joi.string().min(1)).optional(),
+    images: Joi.array().items(Joi.string().min(1)).max(6).optional(),
     variants: Joi.array().items(variantJoi).optional(),
     tags: Joi.array().items(Joi.string().min(1).max(40)).optional(),
   }).unknown(false),
@@ -85,7 +85,7 @@ const validateUpdateProduct = celebrate({
     price: Joi.number().min(0).optional(),
     description: Joi.string().max(2000).optional(),
 
-    images: Joi.array().items(Joi.string().min(1)).optional(),
+    images: Joi.array().items(Joi.string().min(1)).max(6).optional(),
     variants: Joi.array().items(variantJoi).optional(),
     tags: Joi.array().items(Joi.string().min(1).max(40)).optional(),
   }).unknown(false),
