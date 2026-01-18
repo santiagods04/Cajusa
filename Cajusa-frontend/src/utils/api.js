@@ -71,10 +71,21 @@ class Api {
   // ======================
   // PRODUCTS
   // ======================
-  getProducts() {
+  getProducts(params = {}) {
     this._checkUrl();
 
-    return fetch(`${this._url}/products`, {
+    const qs = new URLSearchParams();
+
+    Object.entries(params).forEach(([k, v]) => {
+      if (v === undefined || v === null) return;
+      const value = String(v).trim();
+      if (!value) return;
+      qs.set(k, value);
+    });
+
+    const url = `${this._url}/products${qs.toString() ? `?${qs.toString()}` : ""}`;
+
+    return fetch(url, {
       headers: this._headersPublic(),
     }).then((res) => this._checkResponse(res));
   }

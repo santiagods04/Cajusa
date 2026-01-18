@@ -1,16 +1,29 @@
-const mongoose = require('mongoose');
-const Product = require('../models/product');
-const BadRequestError = require('../errors/BadRequestError');
-const NotFoundError = require('../errors/NotFoundError');
+const mongoose = require("mongoose");
+const Product = require("../models/product");
+const BadRequestError = require("../errors/BadRequestError");
+const NotFoundError = require("../errors/NotFoundError");
 
-const parseList = (value) => (value ? String(value).split(',').map((s) => s.trim()).filter(Boolean) : []);
+const parseList = (value) =>
+  value
+    ? String(value)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
 
 const getProducts = (req, res, next) => {
   const {
-    line, category, subcategory, tag, q,
-    size, color, available,
-    page = 1, limit = 20,
-    sort = '-createdAt',
+    line,
+    category,
+    subcategory,
+    tag,
+    q,
+    size,
+    color,
+    available,
+    page = 1,
+    limit = 20,
+    sort = "-createdAt",
   } = req.query;
 
   const filter = {};
@@ -20,19 +33,29 @@ const getProducts = (req, res, next) => {
   const subcategories = parseList(subcategory);
   const tags = parseList(tag);
 
-  if (lines.length) filter.line = { $in: lines };
-  if (categories.length) filter.category = { $in: categories };
-  if (subcategories.length) filter.subcategory = { $in: subcategories };
-  if (tags.length) filter.tags = { $in: tags };
+  const escapeRegex = (str) =>
+    String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const toExactRegexI = (value) =>
+    new RegExp(`^${escapeRegex(String(value).trim())}$`, "i");
 
-  if (q) filter.name = { $regex: String(q), $options: 'i' };
+  if (lines.length) filter.line = { $in: lines.map(toExactRegexI) };
+  if (categories.length)
+    filter.category = { $in: categories.map(toExactRegexI) };
+  if (subcategories.length)
+    filter.subcategory = { $in: subcategories.map(toExactRegexI) };
+
+  // tags: igual aplica (y como es array en el doc, $in funciona bien con regex)
+  if (tags.length) filter.tags = { $in: tags.map(toExactRegexI) };
+
+  if (q) filter.name = { $regex: String(q), $options: "i" };
 
   // Filtrar por variantes (size/color/available)
-  if (size || color || typeof available !== 'undefined') {
+  if (size || color || typeof available !== "undefined") {
     const v = {};
     if (size) v.size = String(size);
     if (color) v.color = String(color);
-    if (typeof available !== 'undefined') v.available = String(available) === 'true';
+    if (typeof available !== "undefined")
+      v.available = String(available) === "true";
 
     filter.variants = { $elemMatch: v };
   }
@@ -54,7 +77,7 @@ const getProductById = (req, res, next) => {
   const { productId } = req.params;
 
   if (!mongoose.isValidObjectId(productId)) {
-    return next(new BadRequestError('ID inválido'));
+    return next(new BadRequestError("ID inválido"));
   }
 
   return Product.findById(productId)
@@ -62,33 +85,35 @@ const getProductById = (req, res, next) => {
     .lean()
     .then((product) => res.send(product))
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') return next(new NotFoundError('Producto no encontrado'));
+      if (err.name === "DocumentNotFoundError")
+        return next(new NotFoundError("Producto no encontrado"));
       return next(err);
     });
 };
 
-const createProduct = (req, res, next) => Product.create(req.body)
-  .then((product) => res.status(201).send(product))
-  .catch(next);
+const createProduct = (req, res, next) =>
+  Product.create(req.body)
+    .then((product) => res.status(201).send(product))
+    .catch(next);
 
 const updateProduct = (req, res, next) => {
   const { productId } = req.params;
 
   if (!mongoose.isValidObjectId(productId)) {
-    return next(new BadRequestError('ID inválido'));
+    return next(new BadRequestError("ID inválido"));
   }
 
   const { code, ...safeBody } = req.body;
 
-  return Product.findByIdAndUpdate(
-    productId,
-    safeBody,
-    { new: true, runValidators: true },
-  )
+  return Product.findByIdAndUpdate(productId, safeBody, {
+    new: true,
+    runValidators: true,
+  })
     .orFail()
     .then((product) => res.send(product))
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') return next(new NotFoundError('Producto no encontrado'));
+      if (err.name === "DocumentNotFoundError")
+        return next(new NotFoundError("Producto no encontrado"));
       return next(err);
     });
 };
@@ -97,15 +122,18 @@ const deleteProduct = (req, res, next) => {
   const { productId } = req.params;
 
   if (!mongoose.isValidObjectId(productId)) {
-    return next(new BadRequestError('ID inválido'));
+    return next(new BadRequestError("ID inválido"));
   }
 
   return Product.findById(productId)
     .orFail()
-    .then((product) => Product.deleteOne({ _id: product._id }).then(() => product))
+    .then((product) =>
+      Product.deleteOne({ _id: product._id }).then(() => product),
+    )
     .then((product) => res.send(product))
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') return next(new NotFoundError('Producto no encontrado'));
+      if (err.name === "DocumentNotFoundError")
+        return next(new NotFoundError("Producto no encontrado"));
       return next(err);
     });
 };

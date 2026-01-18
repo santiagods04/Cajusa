@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
-import { getProducts } from "../../services/productsService";
+import { useContext, useEffect, useMemo, useState } from "react";
+import AppContext from "../../context/AppContext";
 
 const formatCOP = (value) => {
   if (typeof value !== "number") return null;
@@ -13,54 +13,34 @@ const formatCOP = (value) => {
 
 const normalize = (v) => String(v || "").toLowerCase().trim();
 
+const uniqSorted = (arr) => {
+  const sortAlpha = (a, b) => String(a).localeCompare(String(b), "es");
+  return Array.from(new Set(arr.filter(Boolean))).sort(sortAlpha);
+};
+
 export default function Catalog() {
+  const { products: ctxProducts, productsLoading, productsError, onProductsReload, getProductsRaw } =
+    useContext(AppContext);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const line = searchParams.get("line") || "all";
 
-  const [products, setProducts] = useState([]);
-  const [error, setError] = useState("");
+  const products = Array.isArray(ctxProducts) ? ctxProducts : [];
 
- 
+  // Search
   const [queryDraft, setQueryDraft] = useState("");
   const [query, setQuery] = useState("");
 
+  // Filtros (categoría/subcategoría multi; talla/color single)
   const [selectedCategories, setSelectedCategories] = useState(new Set());
-  const [selectedSizes, setSelectedSizes] = useState(new Set());
-  const [selectedColors, setSelectedColors] = useState(new Set());
+  const [selectedSubcategories, setSelectedSubcategories] = useState(new Set());
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
 
-  useEffect(() => {
-    setError("");
-    getProducts()
-      .then(setProducts)
-      .catch((e) => setError(e?.message || "Error cargando productos"));
-  }, []);
+  // Productos base para construir opciones (depende SOLO de line)
+  const [baseProducts, setBaseProducts] = useState([]);
 
-  const facets = useMemo(() => {
-    const categories = new Set();
-    const subcategories = new Set();
-    const sizes = new Set();
-    const colors = new Set();
-
-    products.forEach((p) => {
-      if (p?.category) categories.add(p.category);
-      if (p?.subcategory) subcategories.add(p.subcategory);
-
-      (p?.variants || []).forEach((v) => {
-        if (v?.size) sizes.add(v.size);
-        if (v?.color) colors.add(v.color);
-      });
-    });
-
-    const sortAlpha = (a, b) => String(a).localeCompare(String(b), "es");
-
-    return {
-      categories: Array.from(categories).sort(sortAlpha),
-      subcategories: Array.from(subcategories).sort(sortAlpha),
-      sizes: Array.from(sizes).sort(sortAlpha),
-      colors: Array.from(colors).sort(sortAlpha),
-    };
-  }, [products]);
-
+  // --- helpers ---
   const toggleInSet = (setter, value) => {
     setter((prev) => {
       const next = new Set(prev);
@@ -70,37 +50,100 @@ export default function Catalog() {
     });
   };
 
-  const filtered = useMemo(() => {
-    let list = products;
+  const toggleSingle = (setter, value) => {
+    setter((prev) => (prev === value ? "" : value));
+  };
 
-    if (line !== "all") list = list.filter((p) => p?.line === line);
+  const clearSidebarFilters = () => {
+    setSelectedCategories(new Set());
+    setSelectedSubcategories(new Set());
+    setSelectedSize("");
+    setSelectedColor("");
+  };
 
-    const q = normalize(query);
-    if (q) {
-      list = list.filter((p) => {
-        const hay = `${p?.name || ""} ${p?.category || ""} ${p?.line || ""}`;
-        return normalize(hay).includes(q);
+  const clearSearch = () => {
+    setQuery("");
+    setQueryDraft("");
+  };
+
+  // Si cambia la línea, limpiamos filtros (para evitar combinaciones inválidas)
+  useEffect(() => {
+    clearSidebarFilters();
+  }, [line]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 1) Cargar BASE por línea (para opciones)
+  useEffect(() => {
+    if (typeof getProductsRaw !== "function") return;
+
+    const params = { page: 1, limit: 200, sort: "-createdAt" };
+    if (line !== "all") params.line = line;
+
+    getProductsRaw(params)
+      .then((data) => setBaseProducts(Array.isArray(data) ? data : []))
+      .catch(() => setBaseProducts([]));
+  }, [line, getProductsRaw]);
+
+  // 2) Opciones SIEMPRE visibles, calculadas desde baseProducts (solo línea)
+  const facets = useMemo(() => {
+    const categories = [];
+    const subcategories = [];
+    const sizes = [];
+    const colors = [];
+
+    baseProducts.forEach((p) => {
+      if (p?.category) categories.push(p.category);
+      if (p?.subcategory) subcategories.push(p.subcategory);
+      const isAvailable = (v) => Number(v?.quantity || 0) > 0;
+
+      (p?.variants || []).forEach((v) => {
+        if (!isAvailable(v)) return;
+
+        if (v?.size) sizes.push(v.size);
+        if (v?.color) colors.push(v.color);
       });
+    });
+
+    return {
+      categories: uniqSorted(categories),
+      subcategories: uniqSorted(subcategories),
+      sizes: uniqSorted(sizes),
+      colors: uniqSorted(colors),
+    };
+  }, [baseProducts]);
+
+  // 3) Params de resultados (backend)
+  const requestParams = useMemo(() => {
+    const params = { page: 1, limit: 200, sort: "-createdAt" };
+
+    if (line !== "all") params.line = line;
+
+    const q = String(query || "").trim();
+    if (q) params.q = q;
+
+    const cats = Array.from(selectedCategories);
+    if (cats.length) params.category = cats.join(",");
+
+    const subs = Array.from(selectedSubcategories);
+    if (subs.length) params.subcategory = subs.join(",");
+
+    if (selectedSize) {
+      params.size = selectedSize;
+      params.available = "true";
     }
 
-    if (selectedCategories.size) {
-      list = list.filter((p) => selectedCategories.has(p?.category));
+    if (selectedColor) {
+      params.color = selectedColor;
+      params.available = "true";
     }
 
-    if (selectedSizes.size) {
-      list = list.filter((p) =>
-        (p?.variants || []).some((v) => v.available && selectedSizes.has(v.size))
-      );
-    }
+    return params;
+  }, [line, query, selectedCategories, selectedSubcategories, selectedSize, selectedColor]);
 
-    if (selectedColors.size) {
-      list = list.filter((p) =>
-        (p?.variants || []).some((v) => v.available && selectedColors.has(v.color))
-      );
-    }
-
-    return list;
-  }, [products, line, query, selectedCategories, selectedSizes, selectedColors]);
+  // 4) Cargar resultados desde App.jsx
+  useEffect(() => {
+    if (typeof onProductsReload !== "function") return;
+    onProductsReload(requestParams).catch(() => { });
+  }, [onProductsReload, requestParams]);
 
   const btnClass = (value) =>
     `btn btn--ghost catalog__chip ${line === value ? "btn--active" : ""}`;
@@ -110,16 +153,11 @@ export default function Catalog() {
     setQuery(queryDraft);
   };
 
-  const clearSidebarFilters = () => {
-    setSelectedCategories(new Set());
-    setSelectedSizes(new Set());
-    setSelectedColors(new Set());
-  };
-
-  const clearSearch = () => {
-    setQuery("");
-    setQueryDraft("");
-  };
+  const anySidebarFilter =
+    selectedCategories.size ||
+    selectedSubcategories.size ||
+    Boolean(selectedSize) ||
+    Boolean(selectedColor);
 
   return (
     <div className="container">
@@ -127,7 +165,7 @@ export default function Catalog() {
         <div className="catalog__top-head">
           <h1 className="page__title">Catálogo</h1>
           <p className="catalog__meta">
-            {filtered.length} producto{filtered.length === 1 ? "" : "s"}
+            {products.length} producto{products.length === 1 ? "" : "s"}
           </p>
         </div>
 
@@ -142,6 +180,7 @@ export default function Catalog() {
           <button className="btn catalog__search-btn" type="submit">
             Buscar
           </button>
+
           {(query || queryDraft) && (
             <button
               className="btn btn--ghost catalog__search-clear"
@@ -160,7 +199,7 @@ export default function Catalog() {
           <div className="catalog__panel">
             <div className="catalog__panel-head">
               <h2 className="catalog__panel-title">Filtros</h2>
-              {(selectedCategories.size || selectedSizes.size || selectedColors.size) ? (
+              {anySidebarFilter ? (
                 <button
                   className="btn btn--ghost catalog__clear"
                   type="button"
@@ -171,6 +210,7 @@ export default function Catalog() {
               ) : null}
             </div>
 
+            {/* Línea */}
             <div className="catalog__section">
               <div className="catalog__section-title">Línea</div>
               <div className="catalog__chips-row">
@@ -198,9 +238,10 @@ export default function Catalog() {
               </div>
             </div>
 
-            {facets.categories.length > 0 && (
-              <div className="catalog__section">
-                <div className="catalog__section-title">Categoría</div>
+            {/* Categoría (siempre visible) */}
+            <div className="catalog__section">
+              <div className="catalog__section-title">Categoría</div>
+              {facets.categories.length ? (
                 <div className="catalog__checks">
                   {facets.categories.map((c) => (
                     <label key={c} className="catalog__check">
@@ -213,56 +254,87 @@ export default function Catalog() {
                     </label>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="catalog__hint">Sin opciones</div>
+              )}
+            </div>
 
-            {facets.sizes.length > 0 && (
-              <div className="catalog__section">
-                <div className="catalog__section-title">Talla</div>
+            {/* Subcategoría (siempre visible) */}
+            <div className="catalog__section">
+              <div className="catalog__section-title">Subcategoría</div>
+              {facets.subcategories.length ? (
+                <div className="catalog__checks">
+                  {facets.subcategories.map((s) => (
+                    <label key={s} className="catalog__check">
+                      <input
+                        type="checkbox"
+                        checked={selectedSubcategories.has(s)}
+                        onChange={() => toggleInSet(setSelectedSubcategories, s)}
+                      />
+                      <span>{s}</span>
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <div className="catalog__hint">Sin opciones</div>
+              )}
+            </div>
+
+            {/* Talla (siempre visible, single) */}
+            <div className="catalog__section">
+              <div className="catalog__section-title">Talla</div>
+              {facets.sizes.length ? (
                 <div className="catalog__chips-wrap">
                   {facets.sizes.map((s) => (
                     <button
                       key={s}
                       type="button"
-                      className={`btn btn--ghost catalog__chip ${selectedSizes.has(s) ? "btn--active" : ""
+                      className={`btn btn--ghost catalog__chip ${selectedSize === s ? "btn--active" : ""
                         }`}
-                      onClick={() => toggleInSet(setSelectedSizes, s)}
+                      onClick={() => toggleSingle(setSelectedSize, s)}
                     >
                       {s}
                     </button>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="catalog__hint">Sin opciones</div>
+              )}
+            </div>
 
-            {facets.colors.length > 0 && (
-              <div className="catalog__section">
-                <div className="catalog__section-title">Color</div>
+            {/* Color (siempre visible, single) */}
+            <div className="catalog__section">
+              <div className="catalog__section-title">Color</div>
+              {facets.colors.length ? (
                 <div className="catalog__chips-wrap">
                   {facets.colors.map((c) => (
                     <button
                       key={c}
                       type="button"
-                      className={`btn btn--ghost catalog__chip ${selectedColors.has(c) ? "btn--active" : ""
+                      className={`btn btn--ghost catalog__chip ${selectedColor === c ? "btn--active" : ""
                         }`}
-                      onClick={() => toggleInSet(setSelectedColors, c)}
+                      onClick={() => toggleSingle(setSelectedColor, c)}
                     >
                       {c}
                     </button>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="catalog__hint">Sin opciones</div>
+              )}
+            </div>
           </div>
         </aside>
 
         {/* Content */}
         <section className="catalog__content">
-          {error ? (
-            <div className="state">Error: {error}</div>
+          {productsError ? (
+            <div className="state">Error: {productsError}</div>
+          ) : productsLoading ? (
+            <div className="state">Cargando…</div>
           ) : (
             <>
-              {filtered.length === 0 ? (
+              {products.length === 0 ? (
                 <div className="catalog__empty">
                   <h3 className="catalog__empty-title">No encontramos resultados</h3>
                   <p className="catalog__empty-text">
@@ -271,20 +343,25 @@ export default function Catalog() {
                 </div>
               ) : (
                 <div className="catalog__grid">
-                  {filtered.map((p) => {
-                    const img =
-                      Array.isArray(p?.images) ? p.images[0] : null;
+                  {products.map((p) => {
+                    const id = p?._id || p?.id;
+                    const img = Array.isArray(p?.images) ? p.images[0] : null;
                     const price = formatCOP(p?.price);
 
+                    const lineKey = normalize(p?.line);
                     const badgeText =
-                      p?.line === "antifluido"
+                      lineKey === "antifluido"
                         ? "Antifluido"
-                        : p?.line === "lino"
+                        : lineKey === "lino"
                           ? "Lino"
                           : null;
 
                     return (
-                      <Link key={p.id} className="catalog__card" to={`/product/${p.id}`}>
+                      <Link
+                        key={id}
+                        className="catalog__card"
+                        to={id ? `/product/${id}` : "/catalog"}
+                      >
                         <div
                           className={`catalog__media ${img ? "" : "catalog__media--placeholder"
                             }`}
@@ -303,9 +380,7 @@ export default function Catalog() {
                           )}
 
                           {badgeText ? (
-                            <span
-                              className={`catalog__badge catalog__badge--${p.line}`}
-                            >
+                            <span className={`catalog__badge catalog__badge--${lineKey}`}>
                               {badgeText}
                             </span>
                           ) : null}

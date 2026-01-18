@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";
@@ -95,22 +95,24 @@ function App() {
   }, []);
 
   //Products management
-  function onProductsReload() {
+  const onProductsReload = useCallback((params = {}) => {
     setProductsLoading(true);
-    setProductsError('');
+    setProductsError("");
 
-    return api.getProducts()
+    return api.getProducts(params)
       .then((data) => {
         setProducts(Array.isArray(data) ? data : []);
         return data;
       })
       .catch((err) => {
         setProducts([]);
-        setProductsError(err?.message || 'No se pudieron cargar los productos.');
+        setProductsError(err?.message || "No se pudieron cargar los productos.");
         throw err;
       })
       .finally(() => setProductsLoading(false));
-  }
+  }, []);
+
+  const getProductsRaw = useCallback((params = {}) => api.getProducts(params), []);
 
   function onProductDelete(id) {
     setProductsError('');
@@ -200,6 +202,7 @@ function App() {
     productsLoading,
     productsError,
     onProductsReload,
+    getProductsRaw,
     onProductDelete,
     activePopup,
     popupProps,
