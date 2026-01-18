@@ -50,11 +50,26 @@ function ProductForm({
     const [tagDraft, setTagDraft] = useState("");
 
     function setFieldError(field, message) {
+        setTouched((prev) => ({ ...prev, [field]: true }));
         setErrors((prev) => ({ ...prev, [field]: message }));
     }
 
     function touchField(field) {
         setTouched((prev) => ({ ...prev, [field]: true }));
+    }
+
+    function hasError(field) {
+        const msg = errors[field];
+        return typeof msg === "string" && msg.trim().length > 0;
+    }
+
+    function clearFieldError(field) {
+        setErrors((prev) => {
+            if (!prev[field]) return prev;
+            const next = { ...prev };
+            delete next[field];
+            return next;
+        });
     }
 
     const MAX_FILES = 6;
@@ -101,7 +116,7 @@ function ProductForm({
             }
 
             case "description": {
-                if (!v) return "Este campo es obligatorio.";
+                if (!v) return "Este campo Descripción es obligatorio.";
                 if (v && v.length > 600) return "La descripción no puede superar 600 caracteres.";
                 return "";
             }
@@ -115,7 +130,6 @@ function ProductForm({
                 if (total <= 0) return "Debes subir al menos 1 imagen.";
                 if (total > MAX_FILES) return `Máximo ${MAX_FILES} imágenes por producto.`;
 
-                // Validar type y size SOLO para las nuevas (las existentes son URLs/string)
                 const newFiles = newImgs.map((x) => x && x.file).filter(Boolean);
 
                 const invalidType = newFiles.find((f) => !String(f.type || "").startsWith("image/"));
@@ -131,8 +145,25 @@ function ProductForm({
             }
 
             case "variants": {
-                const count = (allValues.variants || []).length;
-                if (count <= 0) return "Agrega al menos 1 variante.";
+                const list = Array.isArray(allValues.variants) ? allValues.variants : [];
+
+                if (list.length === 0) return "Agrega al menos 1 variante.";
+
+                const seen = new Set();
+
+                for (const v of list) {
+                    const size = String(v?.size || "").trim();
+                    const color = String(v?.color || "").trim();
+                    const qty = Number(v?.quantity);
+
+                    if (!size || !color) return "Cada variante debe tener talla y color.";
+                    if (!Number.isFinite(qty) || qty <= 0) return "La cantidad de cada variante debe ser mayor a 0.";
+
+                    const key = `${size.toLowerCase()}|${color.toLowerCase()}`;
+                    if (seen.has(key)) return `Variante duplicada: ${size} - ${color}.`;
+                    seen.add(key);
+                }
+
                 return "";
             }
 
@@ -147,10 +178,41 @@ function ProductForm({
         }
     }
 
+    function commit(updater, fieldsToValidate, forcedErrors) {
+        setValues((prev) => {
+            const next = typeof updater === "function" ? updater(prev) : { ...prev, ...updater };
+
+            // touched
+            setTouched((t) => {
+                const nt = { ...t };
+                fieldsToValidate.forEach((f) => { nt[f] = true; });
+                return nt;
+            });
+
+            // errors
+            setErrors((e) => {
+                const ne = { ...e };
+
+                fieldsToValidate.forEach((f) => {
+                    // si hay forcedErrors para ese campo, gana
+                    if (forcedErrors && Object.prototype.hasOwnProperty.call(forcedErrors, f)) {
+                        ne[f] = forcedErrors[f];
+                        return;
+                    }
+                    ne[f] = validateField(f, next[f], next);
+                });
+
+                return ne;
+            });
+
+            return next;
+        });
+    }
+
     function handleBlur(e) {
-        const { name, value } = e.target;
-        touchField(name);
-        setFieldError(name, validateField(name, value, values));
+        const { name } = e.target;
+        if (!name) return;
+        commit((prev) => prev, [name]);
     }
 
     function handleChange(e) {
@@ -186,56 +248,43 @@ function ProductForm({
     }
 
 
-
-    function validateFiles(files, currentTotal) {
-        if (currentTotal + files.length > MAX_FILES) {
-            const remaining = Math.max(0, MAX_FILES - currentTotal);
-            return `Máximo ${MAX_FILES} imágenes. Solo puedes agregar ${remaining} más.`;
-        }
-
-        const invalidType = files.find((f) => !String(f.type || "").startsWith("image/"));
-        if (invalidType) {
-            return `El archivo "${invalidType.name}" no es una imagen válida.`;
-        }
-
-        const tooBig = files.find((f) => f.size > MAX_SIZE);
-        if (tooBig) {
-            return `Cada imagen debe pesar máximo 1.5MB. "${tooBig.name}" pesa ${(tooBig.size / 1024 / 1024).toFixed(2)}MB.`;
-        }
-
-        return "";
-    }
-
     function handleFilesChange(e) {
         const files = Array.from(e.target.files || []);
         if (!files.length) return;
 
-        // Previsualización
+        // 1) Creamos previews (pero ojo: si luego falla, hay que revocar)
         const mapped = files.map((file) => ({
             file,
             url: URL.createObjectURL(file),
         }));
 
-        // Armamos cómo quedaría el estado si agregamos esto
+        // 2) Simulamos cómo quedaría el estado si los agregamos
+        //    (usamos los values actuales para pre-validar sin ensuciar el state)
         const nextValues = {
             ...values,
             newImages: (values.newImages || []).concat(mapped),
         };
 
-        const errorMsg = validateField("images", null, nextValues);
+        // 3) Validamos usando TU validateField (case "images")
+        //    OJO: el value da igual, tu case usa allValues (images + newImages)
+        const msg = validateField("images", null, nextValues);
 
-        if (errorMsg) {
-            // IMPORTANTE: revocar URLs para no filtrar memoria
-            mapped.forEach((m) => URL.revokeObjectURL(m.url));
-
-            setErrors((prev) => ({ ...prev, images: errorMsg }));
+        // 4) Si hay error: no guardamos nada, solo marcamos touched + error
+        if (msg) {
+            mapped.forEach((m) => URL.revokeObjectURL(m.url)); // evitar fuga de memoria
+            commit((prev) => prev, ["images"], { images: msg });
             e.target.value = "";
             return;
         }
 
-        // OK: guardamos
-        setErrors((prev) => ({ ...prev, images: "" }));
-        setValues(nextValues);
+        // 5) OK: guardamos y validamos (commit marca touched y recalcula errors.images)
+        commit(
+            (prev) => ({
+                ...prev,
+                newImages: (prev.newImages || []).concat(mapped),
+            }),
+            ["images"]
+        );
 
         e.target.value = "";
     }
@@ -286,17 +335,22 @@ function ProductForm({
 
     function openVariantForm() {
         setVariantDraft({ size: "", color: "", quantity: 1 });
-        setVariantError("");
         setIsVariantFormOpen(true);
+        setErrors(function (prev) {
+            return { ...prev, variants: true };
+        });
+        clearFieldError("variants");
+        setTouched((prev) => ({ ...prev, variants: true }));
     }
 
     function closeVariantForm() {
-        setVariantError("");
         setIsVariantFormOpen(false);
     }
 
     function handleVariantDraftChange(e) {
         const { name, value } = e.target;
+
+        setErrors((prev) => ({ ...prev, variants: "" }));
 
         setVariantDraft((prev) => {
             if (name === "quantity") return { ...prev, quantity: Number(value) };
@@ -305,53 +359,62 @@ function ProductForm({
     }
 
     function saveVariant() {
+        setTouched((prev) => ({ ...prev, variants: true }));
         const size = String(variantDraft.size || "").trim();
         const color = String(variantDraft.color || "").trim();
         const quantity = Number(variantDraft.quantity);
 
-        if (!size || !color) {
-            setVariantError("Debes ingresar talla y color.");
+        let msg = "";
+        if (!size || !color) msg = "Debes ingresar talla y color.";
+        else if (!Number.isFinite(quantity) || quantity <= 0) msg = "La cantidad debe ser mayor a 0.";
+
+        if (msg) {
+            setErrors((prev) => ({ ...prev, variants: msg }));
             return;
         }
 
-        if (!Number.isFinite(quantity) || quantity <= 0) {
-            setVariantError("La cantidad debe ser mayor a 0.");
-            return;
-        }
-
-        setVariantError("");
-
-        setValues(function (prev) {
+        setValues((prev) => {
             const prevVariants = Array.isArray(prev.variants) ? prev.variants : [];
 
-            const idx = prevVariants.findIndex(
+            const exists = prevVariants.some(
                 (v) =>
-                    String(v.size).toLowerCase() === size.toLowerCase()
-                    && String(v.color).toLowerCase() === color.toLowerCase()
+                    String(v.size || "").trim().toLowerCase() === size.toLowerCase() &&
+                    String(v.color || "").trim().toLowerCase() === color.toLowerCase()
             );
 
-            let nextVariants;
-            if (idx !== -1) {
-                nextVariants = [...prevVariants];
-                nextVariants[idx] = { ...nextVariants[idx], size, color, quantity };
-            } else {
-                nextVariants = prevVariants.concat({ size, color, quantity });
+            if (exists) {
+                setErrors((e) => ({ ...e, variants: `Variante duplicada: ${size} - ${color}.` }));
+                return prev; // NO guardes nada
             }
 
-            return { ...prev, variants: nextVariants };
+            const nextVariants = prevVariants.concat({ size, color, quantity });
+            const nextAll = { ...prev, variants: nextVariants };
+
+            setErrors((e) => ({ ...e, variants: validateField("variants", nextVariants, nextAll) }));
+            return nextAll;
         });
 
+        // solo cierras si sí guardó
+        clearFieldError("variants");
+        setErrors((prev) => ({ ...prev, variants: "" }));
         setIsVariantFormOpen(false);
         setVariantDraft({ size: "", color: "", quantity: 1 });
     }
 
     function removeVariant(index) {
+        setTouched((prev) => ({ ...prev, variants: true }));
         setValues(function (prev) {
             const prevVariants = Array.isArray(prev.variants) ? prev.variants : [];
-            return {
-                ...prev,
-                variants: prevVariants.filter((_, i) => i !== index),
-            };
+            const nextVariants = prevVariants.filter((_, i) => i !== index);
+
+            const nextAll = { ...prev, variants: nextVariants };
+            const variantsErr = validateField("variants", nextVariants, nextAll);
+
+            setErrors(function (e) {
+                return { ...e, variants: variantsErr };
+            });
+
+            return nextAll;
         });
     }
 
@@ -643,11 +706,13 @@ function ProductForm({
                     <div className="popup__file-row">
                         <input
                             id="product-images"
+                            name="images"
                             className="popup__file-input"
                             type="file"
                             accept="image/*"
                             multiple
                             onChange={handleFilesChange}
+                            onBlur={handleBlur}
                             aria-describedby="image-help"
                             required
                         />
@@ -784,10 +849,9 @@ function ProductForm({
                                     Cancelar
                                 </button>
                             </div>
-
-                            {touched.variants && errors.variants && <p className="popup__error">{errors.variants}</p>}
                         </div>
                     )}
+                    {touched.variants && hasError("variants") && <p className="popup__error">{errors.variants}</p>}
                 </div>
 
                 <div className="popup__field">
