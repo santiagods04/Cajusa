@@ -23,7 +23,7 @@ function ProductForm({
     isSubmitting = false,
     submitError = "",
 }) {
-
+    const isEdit = Boolean(initialValues?._id);
     const FIELDS = [
         "code",
         "name",
@@ -597,12 +597,13 @@ function ProductForm({
                 <div className="popup__field">
                     <label className="popup__label" htmlFor="code">Código</label>
                     <input
-                        className="popup__input"
+                        className={`popup__input ${isEdit ? ".popup__input--readonly" : ""}`}
                         id="code"
                         name="code"
                         value={values.code}
-                        onChange={handleChange}
+                        onChange={isEdit ? undefined : handleChange}
                         onBlur={handleBlur}
+                        readOnly={isEdit}
                         placeholder="un-001/ln-001"
                         required
                     />

@@ -62,6 +62,7 @@ function Popup() {
                 <div className="popup__content">
                     {isProductForm && (
                         <ProductForm
+                            key={`${mode}-${product?._id || "new"}`}
                             initialValues={mode === "edit" ? product : undefined}
                             submitText={submitText}
                             onSubmit={handleProductSubmit}

@@ -173,7 +173,8 @@ function App() {
 
     // edit
     const id = popupProps?.product?._id;
-    return api.updateProduct(id, payload)
+    const { code, ...data } = payload;
+    return api.updateProduct(id, data)
       .then((updated) => {
         setProducts((prev) => prev.map((p) => (p._id === updated._id ? updated : p)));
         closePopup();

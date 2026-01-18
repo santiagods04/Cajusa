@@ -131,7 +131,7 @@ export default function Products() {
                                                         <button
                                                             type="button"
                                                             className="products__icon-btn products__icon-btn_type_edit"
-                                                            onClick={() => handleEdit(p._id)}
+                                                            onClick={() => handleEdit(p)}
                                                             aria-label="Actualizar producto"
                                                             title="Actualizar"
                                                         >
