@@ -54,23 +54,6 @@ function ProductForm({
         setErrors((prev) => ({ ...prev, [field]: message }));
     }
 
-    function touchField(field) {
-        setTouched((prev) => ({ ...prev, [field]: true }));
-    }
-
-    function hasError(field) {
-        const msg = errors[field];
-        return typeof msg === "string" && msg.trim().length > 0;
-    }
-
-    function clearFieldError(field) {
-        setErrors((prev) => {
-            if (!prev[field]) return prev;
-            const next = { ...prev };
-            delete next[field];
-            return next;
-        });
-    }
 
     const MAX_FILES = 6;
     const MAX_SIZE = 1.5 * 1024 * 1024; // 1.5MB
@@ -149,23 +132,17 @@ function ProductForm({
 
                 if (list.length === 0) return "Agrega al menos 1 variante.";
 
+                // opcional pero recomendado: blindaje por si llegan duplicadas desde initialValues
                 const seen = new Set();
-
                 for (const v of list) {
-                    const size = String(v?.size || "").trim();
-                    const color = String(v?.color || "").trim();
-                    const qty = Number(v?.quantity);
-
-                    if (!size || !color) return "Cada variante debe tener talla y color.";
-                    if (!Number.isFinite(qty) || qty <= 0) return "La cantidad de cada variante debe ser mayor a 0.";
-
-                    const key = `${size.toLowerCase()}|${color.toLowerCase()}`;
-                    if (seen.has(key)) return `Variante duplicada: ${size} - ${color}.`;
+                    const key = `${String(v.size || "").trim().toLowerCase()}__${String(v.color || "").trim().toLowerCase()}`;
+                    if (seen.has(key)) return "Tienes variantes duplicadas (talla + color).";
                     seen.add(key);
                 }
 
                 return "";
             }
+
 
             case "tags": {
                 const count = (allValues.tags || []).length;
@@ -252,32 +229,25 @@ function ProductForm({
         const files = Array.from(e.target.files || []);
         if (!files.length) return;
 
-        // 1) Creamos previews (pero ojo: si luego falla, hay que revocar)
         const mapped = files.map((file) => ({
             file,
             url: URL.createObjectURL(file),
         }));
 
-        // 2) Simulamos cómo quedaría el estado si los agregamos
-        //    (usamos los values actuales para pre-validar sin ensuciar el state)
         const nextValues = {
             ...values,
             newImages: (values.newImages || []).concat(mapped),
         };
 
-        // 3) Validamos usando TU validateField (case "images")
-        //    OJO: el value da igual, tu case usa allValues (images + newImages)
         const msg = validateField("images", null, nextValues);
 
-        // 4) Si hay error: no guardamos nada, solo marcamos touched + error
         if (msg) {
-            mapped.forEach((m) => URL.revokeObjectURL(m.url)); // evitar fuga de memoria
+            mapped.forEach((m) => URL.revokeObjectURL(m.url));
             commit((prev) => prev, ["images"], { images: msg });
             e.target.value = "";
             return;
         }
 
-        // 5) OK: guardamos y validamos (commit marca touched y recalcula errors.images)
         commit(
             (prev) => ({
                 ...prev,
@@ -336,30 +306,25 @@ function ProductForm({
     function openVariantForm() {
         setVariantDraft({ size: "", color: "", quantity: 1 });
         setIsVariantFormOpen(true);
-        setErrors(function (prev) {
-            return { ...prev, variants: true };
-        });
-        clearFieldError("variants");
-        setTouched((prev) => ({ ...prev, variants: true }));
+        commit((prev) => prev, ["variants"], { variants: "" });
     }
 
     function closeVariantForm() {
         setIsVariantFormOpen(false);
+        setVariantDraft({ size: "", color: "", quantity: 1 });
+        commit((prev) => prev, ["variants"], { variants: "" });
     }
 
     function handleVariantDraftChange(e) {
         const { name, value } = e.target;
-
-        setErrors((prev) => ({ ...prev, variants: "" }));
-
         setVariantDraft((prev) => {
             if (name === "quantity") return { ...prev, quantity: Number(value) };
             return { ...prev, [name]: value };
         });
+        setErrors((prev) => ({ ...prev, variants: "" }));
     }
 
     function saveVariant() {
-        setTouched((prev) => ({ ...prev, variants: true }));
         const size = String(variantDraft.size || "").trim();
         const color = String(variantDraft.color || "").trim();
         const quantity = Number(variantDraft.quantity);
@@ -369,53 +334,35 @@ function ProductForm({
         else if (!Number.isFinite(quantity) || quantity <= 0) msg = "La cantidad debe ser mayor a 0.";
 
         if (msg) {
-            setErrors((prev) => ({ ...prev, variants: msg }));
+            commit((prev) => prev, ["variants"], { variants: msg });
             return;
         }
 
-        setValues((prev) => {
+        const exists = (values.variants || []).some((v) =>
+            String(v.size || "").trim().toLowerCase() === size.toLowerCase() &&
+            String(v.color || "").trim().toLowerCase() === color.toLowerCase()
+        );
+
+        if (exists) {
+            commit((prev) => prev, ["variants"], { variants: `Variante duplicada: ${size} - ${color}.` });
+            return;
+        }
+
+        commit((prev) => {
             const prevVariants = Array.isArray(prev.variants) ? prev.variants : [];
-
-            const exists = prevVariants.some(
-                (v) =>
-                    String(v.size || "").trim().toLowerCase() === size.toLowerCase() &&
-                    String(v.color || "").trim().toLowerCase() === color.toLowerCase()
-            );
-
-            if (exists) {
-                setErrors((e) => ({ ...e, variants: `Variante duplicada: ${size} - ${color}.` }));
-                return prev; // NO guardes nada
-            }
-
             const nextVariants = prevVariants.concat({ size, color, quantity });
-            const nextAll = { ...prev, variants: nextVariants };
+            return { ...prev, variants: nextVariants };
+        }, ["variants"]);
 
-            setErrors((e) => ({ ...e, variants: validateField("variants", nextVariants, nextAll) }));
-            return nextAll;
-        });
-
-        // solo cierras si sí guardó
-        clearFieldError("variants");
-        setErrors((prev) => ({ ...prev, variants: "" }));
-        setIsVariantFormOpen(false);
-        setVariantDraft({ size: "", color: "", quantity: 1 });
+        closeVariantForm();
     }
 
     function removeVariant(index) {
-        setTouched((prev) => ({ ...prev, variants: true }));
-        setValues(function (prev) {
+        commit((prev) => {
             const prevVariants = Array.isArray(prev.variants) ? prev.variants : [];
             const nextVariants = prevVariants.filter((_, i) => i !== index);
-
-            const nextAll = { ...prev, variants: nextVariants };
-            const variantsErr = validateField("variants", nextVariants, nextAll);
-
-            setErrors(function (e) {
-                return { ...e, variants: variantsErr };
-            });
-
-            return nextAll;
-        });
+            return { ...prev, variants: nextVariants };
+        }, ["variants"]);
     }
 
     function openTagForm() {
@@ -851,7 +798,7 @@ function ProductForm({
                             </div>
                         </div>
                     )}
-                    {touched.variants && hasError("variants") && <p className="popup__error">{errors.variants}</p>}
+                    {touched.variants && (errors.variants || "").trim() && <p className="popup__error">{errors.variants}</p>}
                 </div>
 
                 <div className="popup__field">
