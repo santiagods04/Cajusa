@@ -52,42 +52,58 @@ const validateProductId = celebrate({
   }),
 });
 
+const imageHttpUrl = Joi.string()
+  .trim()
+  .uri({ scheme: ["http", "https"] })
+;
+
+const imageDataUrl = Joi.string()
+  .trim()
+  .pattern(
+    /^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$/i
+  )
+;
+
+const imageRelative = Joi.string().trim().pattern(/^\/[^\s]+$/);
+
+const imageItem = Joi.alternatives().try(imageHttpUrl, imageDataUrl, imageRelative);
+
 const variantJoi = Joi.object().keys({
-  size: Joi.string().min(1).max(20).required(),
-  color: Joi.string().min(1).max(30).required(),
-  quantity: Joi.number().integer().min(0).required(),
+  size: Joi.string().trim().min(1).max(20).required(),
+  color: Joi.string().trim().min(1).max(30).required(),
+  quantity: Joi.number().integer().min(1).required(),
 }).unknown(false);
 
 const validateCreateProduct = celebrate({
   body: Joi.object().keys({
-    code: Joi.string().min(3).max(60).required(),
-    line: Joi.string().min(2).max(60).required(),
-    category: Joi.string().min(2).max(60).required(),
-    subcategory: Joi.string().min(2).max(60).required(),
+    code: Joi.string().trim().min(3).max(60).required(),
+    line: Joi.string().trim().min(2).max(60).required(),
+    category: Joi.string().trim().min(2).max(60).required(),
+    subcategory: Joi.string().trim().min(2).max(60).required(),
 
-    name: Joi.string().min(2).max(120).required(),
+    name: Joi.string().trim().min(2).max(120).required(),
     price: Joi.number().min(0).required(),
-    description: Joi.string().max(600).required(),
+    description: Joi.string().trim().max(600).required(),
 
-    images: Joi.array().items(Joi.string().min(1)).max(6).optional(),
-    variants: Joi.array().items(variantJoi).optional(),
-    tags: Joi.array().items(Joi.string().min(1).max(40)).optional(),
+    images: Joi.array().items(imageItem).max(6).required(),
+    variants: Joi.array().items(variantJoi).required(),
+    tags: Joi.array().items(Joi.string().trim().min(1).max(40)).min(1).max(15).required(),
   }).unknown(false),
 });
 
 const validateUpdateProduct = celebrate({
   body: Joi.object().keys({
-    line: Joi.string().min(2).max(60).optional(),
-    category: Joi.string().min(2).max(60).optional(),
-    subcategory: Joi.string().min(2).max(60).optional(),
+    line: Joi.string().trim().min(2).max(60).optional(),
+    category: Joi.string().trim().min(2).max(60).optional(),
+    subcategory: Joi.string().trim().min(2).max(60).optional(),
 
-    name: Joi.string().min(2).max(120).optional(),
+    name: Joi.string().trim().min(2).max(120).optional(),
     price: Joi.number().min(0).optional(),
-    description: Joi.string().max(600).optional(),
+    description: Joi.string().trim().min(10).max(600).optional(),
 
-    images: Joi.array().items(Joi.string().min(1)).max(6).optional(),
+    images: Joi.array().items(imageItem).min(1).max(6).optional(),
     variants: Joi.array().items(variantJoi).optional(),
-    tags: Joi.array().items(Joi.string().min(1).max(40)).optional(),
+    tags: Joi.array().items(Joi.string().trim().min(1).max(40)).min(1).optional(),
   }).unknown(false),
 });
 

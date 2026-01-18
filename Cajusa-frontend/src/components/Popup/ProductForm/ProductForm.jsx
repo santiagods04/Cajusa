@@ -145,8 +145,21 @@ function ProductForm({
 
 
             case "tags": {
-                const count = (allValues.tags || []).length;
-                if (count > 40) return "Máximo 40 tags.";
+                const raw = Array.isArray(allValues.tags) ? allValues.tags : [];
+
+                const clean = raw
+                    .map((t) => String(t || "").trim().toLowerCase())
+                    .filter(Boolean);
+
+                if (clean.length === 0) return "Agrega al menos 1 tag.";
+                if (clean.length > MAX_TAGS) return `Máximo ${MAX_TAGS} tags.`;
+
+                const seen = new Set();
+                for (const key of clean) {
+                    if (seen.has(key)) return "Tienes tags duplicados.";
+                    seen.add(key);
+                }
+
                 return "";
             }
 
@@ -367,20 +380,23 @@ function ProductForm({
 
     function openTagForm() {
         setIsTagFormOpen(true);
-        setTagError("");
+        setTagDraft("");
+        commit((prev) => prev, ["tags"], { tags: "" });
     }
 
     function closeTagForm() {
         setIsTagFormOpen(false);
         setTagDraft("");
-        setTagError("");
     }
 
     function handleTagDraftChange(e) {
         setTagDraft(e.target.value);
+        if (touched.tags && (errors.tags || "").trim()) {
+            commit((prev) => prev, ["tags"], { tags: "" });
+        }
     }
 
-    const MAX_TAGS = 10;
+    const MAX_TAGS = 15;
 
     function normalizeTag(raw) {
         return String(raw || "")
@@ -402,38 +418,50 @@ function ProductForm({
 
     function addTag(raw) {
         const rawValue = raw && raw.target ? undefined : raw;
-        const text = normalizeTag(raw ?? tagDraft);
+        const text = normalizeTag(rawValue ?? tagDraft);
 
+        // 1) vacío
         if (!text) {
-            setTagError("Escribe un tag primero.");
+            commit((prev) => prev, ["tags"], { tags: "Escribe un tag primero." });
             return;
         }
 
-        setValues((prev) => {
-            const current = Array.isArray(prev.tags) ? prev.tags : [];
+        const current = Array.isArray(values.tags) ? values.tags : [];
 
-            if (current.length >= MAX_TAGS) {
-                setTagError(`Máximo ${MAX_TAGS} tags.`);
-                return prev;
-            }
+        // 2) límite
+        if (current.length >= MAX_TAGS) {
+            commit((prev) => prev, ["tags"], { tags: `Máximo ${MAX_TAGS} tags.` });
+            return;
+        }
 
-            if (current.includes(text)) {
-                setTagError("Ese tag ya existe.");
-                return prev;
-            }
+        // 3) duplicado (comparación normalizada)
+        const exists = current.some((t) => normalizeTag(t) === text);
+        if (exists) {
+            commit((prev) => prev, ["tags"], { tags: "Ese tag ya existe." });
+            return;
+        }
 
-            setTagError("");
-            return { ...prev, tags: current.concat(text) };
-        });
+        // 4) ok: guardas y validas con commit
+        commit(
+            (prev) => {
+                const prevTags = Array.isArray(prev.tags) ? prev.tags : [];
+                return { ...prev, tags: prevTags.concat(text) };
+            },
+            ["tags"]
+        );
 
         closeTagForm();
     }
 
     function removeTag(index) {
-        setValues((prev) => {
-            const current = Array.isArray(prev.tags) ? prev.tags : [];
-            return { ...prev, tags: current.filter((_, i) => i !== index) };
-        });
+        commit(
+            (prev) => {
+                const current = Array.isArray(prev.tags) ? prev.tags : [];
+                const next = current.filter((_, i) => i !== index);
+                return { ...prev, tags: next };
+            },
+            ["tags"]
+        );
     }
 
     function handleTagKeyDown(e) {
@@ -443,12 +471,40 @@ function ProductForm({
         }
     }
 
+
     function handleTagPaste(e) {
         const pasted = e.clipboardData.getData("text");
         if (!pasted || !pasted.includes(",")) return;
 
         e.preventDefault();
-        pasted.split(",").forEach((t) => addTag(t));
+
+        const items = pasted
+            .split(",")
+            .map((t) => normalizeTag(t))
+            .filter(Boolean);
+
+        if (!items.length) {
+            commit((prev) => prev, ["tags"], { tags: "No se detectaron tags válidos." });
+            return;
+        }
+
+        commit(
+            (prev) => {
+                const current = Array.isArray(prev.tags) ? prev.tags : [];
+                const set = new Set(current.map((t) => normalizeTag(t)));
+                const next = [...current];
+
+                for (const t of items) {
+                    if (next.length >= MAX_TAGS) break;
+                    if (set.has(t)) continue;
+                    set.add(t);
+                    next.push(t);
+                }
+
+                return { ...prev, tags: next };
+            },
+            ["tags"]
+        );
     }
 
 
@@ -839,6 +895,7 @@ function ProductForm({
                         <div className="popup__tag-form">
                             <input
                                 id="product-tags"
+                                name="tags"
                                 className="popup__input"
                                 type="text"
                                 placeholder="Ej: antifluido"
@@ -859,10 +916,9 @@ function ProductForm({
                                     Cancelar
                                 </button>
                             </div>
-
-                            {touched.tags && errors.tags && <p className="popup__error">{errors.tags}</p>}
                         </div>
                     )}
+                    {touched.tags && (errors.tags || "").trim() && <p className="popup__error">{errors.tags}</p>}
                 </div>
 
             </div>
