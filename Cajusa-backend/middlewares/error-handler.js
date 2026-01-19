@@ -26,7 +26,13 @@ module.exports = (err, req, res, next) => {
 
   if (isCelebrateError(err)) {
     err.statusCode = 400;
-    err.message = "Datos inválidos";
+
+    const first = err.details.values().next().value; // Joi error
+    const detail = first?.details?.[0];
+
+    err.message = detail?.message
+      ? detail.message.replace(/"/g, "")
+      : "Datos inválidos";
   }
 
   const { statusCode = 500 } = err;

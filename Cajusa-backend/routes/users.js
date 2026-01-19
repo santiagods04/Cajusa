@@ -8,11 +8,17 @@ const {
   upsertCartItem,
   removeCartItem,
   clearCart,
+  updatePersonalData,
+  updateEmail,
+  updatePassword,
 } = require('../controllers/users');
 
-const { validateAddress, validateCartUpsert } = require('../middlewares/validation');
+const { validateAddress, validateCartUpsert, validateUpdatePersonalData, validateUpdateEmail, validateUpdatePassword } = require('../middlewares/validation');
 
 router.get('/me', getCurrentUser);
+router.patch('/me', validateUpdatePersonalData, updatePersonalData);
+router.patch('/me/email', validateUpdateEmail, updateEmail);
+router.patch('/me/password', validateUpdatePassword, updatePassword);
 // Direcciones
 router.post('/me/addresses', validateAddress, addAddress);
 router.patch('/me/addresses/:addressId/default', setDefaultAddress);

@@ -46,6 +46,74 @@ const getCurrentUser = (req, res, next) => {
     });
 };
 
+const updatePersonalData = (req, res, next) => {
+  const { name, nickname, phone } = req.body;
+
+  return User.findByIdAndUpdate(
+    req.user._id,
+    { name, nickname, phone },
+    { new: true, runValidators: true }
+  )
+    .orFail()
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.name === 'DocumentNotFoundError') {
+        return next(new NotFoundError('Usuario no encontrado'));
+      }
+      // Celebrate ya te tira 400 con "Datos inválidos", pero por si algo se cuela:
+      if (err.name === 'ValidationError') {
+        return next(new BadRequestError('Datos inválidos'));
+      }
+      return next(err);
+    });
+};
+
+const updatePassword = (req, res, next) => {
+  const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+  if (newPassword !== confirmNewPassword) {
+    return next(new BadRequestError('La confirmación de contraseña no coincide'));
+  }
+
+  if (currentPassword === newPassword) {
+    return next(new BadRequestError('La nueva contraseña no puede ser igual a la actual'));
+  }
+
+  return User.findById(req.user._id)
+    .select('+password')
+    .orFail()
+    .then((user) =>
+      bcrypt.compare(currentPassword, user.password).then((matched) => {
+        if (!matched) throw new BadRequestError('La contraseña actual es incorrecta');
+        return bcrypt.hash(newPassword, 10);
+      })
+    )
+    .then((hash) =>
+      User.findByIdAndUpdate(req.user._id, { password: hash }, { new: true, runValidators: true })
+    )
+    .then(() => res.send({ message: 'Contraseña actualizada' }))
+    .catch(next);
+};
+
+const updateEmail = (req, res, next) => {
+  const { email } = req.body;
+
+  return User.findByIdAndUpdate(
+    req.user._id,
+    { email },
+    { new: true, runValidators: true }
+  )
+    .orFail()
+    .select("-password")
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.name === "DocumentNotFoundError") {
+        return next(new NotFoundError("Usuario no encontrado"));
+      }
+      return next(err);
+    });
+};
+
 const addAddress = (req, res, next) => {
   const address = req.body;
 
@@ -200,4 +268,7 @@ module.exports = {
   upsertCartItem,
   removeCartItem,
   clearCart,
+  updatePersonalData,
+  updateEmail,
+  updatePassword,
 };
