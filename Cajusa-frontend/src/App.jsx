@@ -113,6 +113,7 @@ function App() {
   }, []);
 
   const getProductsRaw = useCallback((params = {}) => api.getProducts(params), []);
+  const getProductByIdRaw = useCallback((id) => api.getProductById(id), []);
 
   function onProductDelete(id) {
     setProductsError('');
@@ -203,6 +204,7 @@ function App() {
     productsError,
     onProductsReload,
     getProductsRaw,
+    getProductByIdRaw,
     onProductDelete,
     activePopup,
     popupProps,

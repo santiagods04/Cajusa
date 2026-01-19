@@ -1,15 +1,19 @@
 import { useParams, Link } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
-import { getProductById, getProducts } from "../../services/productsService";
+import { useEffect, useMemo, useState, useContext } from "react";
+import AppContext from "../../context/AppContext";
 import { openWhatsApp } from "../../utils/whatsapp";
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const { getProductByIdRaw, getProductsRaw } = useContext(AppContext);
 
   const [product, setProduct] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Selección (NO va dentro de product)
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
-  const [error, setError] = useState("");
 
   // Slider
   const [activeIndex, setActiveIndex] = useState(0);
@@ -19,17 +23,42 @@ export default function ProductDetail() {
   const [related, setRelated] = useState([]);
 
   useEffect(() => {
-    setError("");
-    setProduct(null);
-    setSize("");
-    setColor("");
-    setActiveIndex(0);
-    setIsZoomOpen(false);
+    if (!id || typeof getProductByIdRaw !== "function") return;
 
-    getProductById(id)
-      .then(setProduct)
-      .catch((e) => setError(e?.message || "Error cargando producto"));
-  }, [id]);
+    setIsLoading(true);
+    setError("");
+
+    getProductByIdRaw(id)
+      .then((data) => {
+        if (!data) throw new Error("Producto no encontrado");
+
+        const mapped = {
+          ...data,
+          id: data._id ?? data.id,
+          variants: Array.isArray(data.variants)
+            ? data.variants.map((v) => ({
+                ...v,
+                available:
+                  typeof v.available === "boolean"
+                    ? v.available
+                    : Number(v.quantity || 0) > 0,
+              }))
+            : [],
+        };
+
+        setProduct(mapped);
+
+        // ✅ importantísimo: al cambiar de producto, resetea selección
+        setSize("");
+        setColor("");
+        setActiveIndex(0);
+      })
+      .catch((e) => {
+        setError(e?.message || "Producto no encontrado");
+        setProduct(null);
+      })
+      .finally(() => setIsLoading(false));
+  }, [id, getProductByIdRaw]);
 
   // Normaliza imágenes: soporta strings o {url}/{src}
   const images = useMemo(() => {
@@ -44,7 +73,6 @@ export default function ProductDetail() {
         .filter(Boolean);
     }
 
-    // fallbacks por si tu backend usa otro campo
     const single = product?.image || product?.img || product?.photo || "";
     return single ? [single] : [];
   }, [product]);
@@ -56,7 +84,6 @@ export default function ProductDetail() {
   }, [images.length]);
 
   const activeImg = images[activeIndex] || "";
-
   const hasManyImages = images.length > 1;
 
   const goPrev = () => {
@@ -84,7 +111,7 @@ export default function ProductDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isZoomOpen, images.length]);
 
-  // Variantes (tallas/colores)
+  // Variantes (tallas/colores) - si quieres solo disponibles, filtra por v.available
   const sizes = useMemo(() => {
     if (!product?.variants) return [];
     return [...new Set(product.variants.map((v) => v.size))].filter(Boolean);
@@ -96,9 +123,23 @@ export default function ProductDetail() {
   }, [product]);
 
   // WhatsApp
-  const needsVariant = Array.isArray(product?.variants) && product.variants.length > 0;
+  const needsVariant =
+    Array.isArray(product?.variants) && product.variants.length > 0;
+
+  // ✅ AQUÍ estaba el bug: estabas mirando product.size/product.color
   const canBuy = !needsVariant || (size && color);
-  const lineLabel = product?.line === "antifluido" ? "Antifluido" : "Lino";
+
+  const lineLabel =
+    String(product?.line || "").toLowerCase() === "antifluido"
+      ? "Antifluido"
+      : "Lino";
+  
+  const priceLabel =
+  typeof product?.price === "number"
+    ? `$${product.price.toLocaleString("es-CO")}`
+    : product?.price
+      ? `$${Number(product.price).toLocaleString("es-CO")}`
+      : "--";
 
   const SPARK = "\u2728";
   const OK = "\u2705";
@@ -106,6 +147,7 @@ export default function ProductDetail() {
   const waText =
     `Hola! ${SPARK} Me interesa este producto:\n\n` +
     `• Producto: ${product?.name}\n` +
+    `• Precio: ${priceLabel}\n` +
     `• Línea: ${lineLabel}\n` +
     `• Categoría: ${product?.category}\n` +
     `• Talla: ${size || "--"}\n` +
@@ -120,29 +162,38 @@ export default function ProductDetail() {
     openWhatsApp(waText);
   }
 
-  // Relacionados: intenta traer lista completa y filtra por categoria/linea
+  // Relacionados (100% back) usando getProductsRaw si existe en contexto
   useEffect(() => {
     setRelated([]);
 
     if (!product) return;
-    if (typeof getProducts !== "function") return; // por si no existe aún
+    if (typeof getProductsRaw !== "function") return;
 
-    getProducts()
+    // trae por misma linea/categoría para no traer TODO
+    const params = {
+      page: 1,
+      limit: 20,
+      sort: "-createdAt",
+    };
+    if (product.line) params.line = product.line;
+    if (product.category) params.category = product.category;
+
+    getProductsRaw(params)
       .then((list) => {
         const pid = String(product.id || product._id || id);
 
         const filtered = (Array.isArray(list) ? list : [])
           .filter((p) => String(p.id || p._id) !== pid)
-          .filter((p) => p.category === product.category || p.line === product.line)
           .slice(0, 8);
 
         setRelated(filtered);
       })
       .catch(() => setRelated([]));
-  }, [product, id]);
+  }, [product, id, getProductsRaw]);
 
   if (error) return <div className="state container">Error: {error}</div>;
-  if (!product) return <div className="state container">Cargando...</div>;
+  if (isLoading || !product)
+    return <div className="state container">Cargando...</div>;
 
   return (
     <div className="container">
@@ -159,11 +210,18 @@ export default function ProductDetail() {
                 <button
                   key={`${src}-${idx}`}
                   type="button"
-                  className={`product__thumbBtn ${idx === activeIndex ? "product__thumbBtn--active" : ""}`}
+                  className={`product__thumbBtn ${
+                    idx === activeIndex ? "product__thumbBtn--active" : ""
+                  }`}
                   onClick={() => setActiveIndex(idx)}
                   aria-label={`Ver imagen ${idx + 1}`}
                 >
-                  <img className="product__thumbImg" src={src} alt={`${product.name} miniatura ${idx + 1}`} loading="lazy" />
+                  <img
+                    className="product__thumbImg"
+                    src={src}
+                    alt={`${product.name} miniatura ${idx + 1}`}
+                    loading="lazy"
+                  />
                 </button>
               ))
             ) : (
@@ -180,7 +238,11 @@ export default function ProductDetail() {
               disabled={!images.length}
             >
               {images.length ? (
-                <img className="product__mainImg" src={activeImg} alt={product.name} />
+                <img
+                  className="product__mainImg"
+                  src={activeImg}
+                  alt={product.name}
+                />
               ) : (
                 <div className="product__noMain">Sin imágenes</div>
               )}
@@ -212,7 +274,10 @@ export default function ProductDetail() {
                   ›
                 </button>
 
-                <div className="product__counter" aria-label="Contador de imágenes">
+                <div
+                  className="product__counter"
+                  aria-label="Contador de imágenes"
+                >
                   {activeIndex + 1}/{images.length}
                 </div>
               </>
@@ -224,7 +289,6 @@ export default function ProductDetail() {
         <section className="product__info">
           <h1 className="page__title">{product.name}</h1>
 
-          {/* Precio (si existe) */}
           {product.price != null && (
             <p className="product__price">
               ${Number(product.price).toLocaleString("es-CO")}
@@ -267,11 +331,7 @@ export default function ProductDetail() {
             </label>
 
             <div className="product__cta">
-              <button
-                className="btn btn--active"
-                type="button"
-                onClick={handleWhatsApp}
-              >
+              <button className="btn btn--active" type="button" onClick={handleWhatsApp}>
                 Comprar por WhatsApp
               </button>
 
@@ -298,12 +358,13 @@ export default function ProductDetail() {
           <div className="product__relatedGrid">
             {related.map((p) => {
               const rid = p.id || p._id;
-
-              // Ajusta si tu ruta es distinta:
-              const to = `/producto/${rid}`;
+              const to = `/product/${rid}`;
 
               const rImg =
-                (Array.isArray(p.images) && (typeof p.images[0] === "string" ? p.images[0] : p.images[0]?.url)) ||
+                (Array.isArray(p.images) &&
+                  (typeof p.images[0] === "string"
+                    ? p.images[0]
+                    : p.images[0]?.url)) ||
                 p.image ||
                 p.img ||
                 "";
@@ -312,7 +373,12 @@ export default function ProductDetail() {
                 <Link key={rid} className="product__relatedCard" to={to}>
                   <div className="product__relatedImgWrap">
                     {rImg ? (
-                      <img className="product__relatedImg" src={rImg} alt={p.name} loading="lazy" />
+                      <img
+                        className="product__relatedImg"
+                        src={rImg}
+                        alt={p.name}
+                        loading="lazy"
+                      />
                     ) : (
                       <div className="product__relatedNoImg">Sin imagen</div>
                     )}
@@ -330,7 +396,9 @@ export default function ProductDetail() {
             })}
           </div>
         ) : (
-          <p className="product__relatedEmpty">Aún no hay relacionados para mostrar.</p>
+          <p className="product__relatedEmpty">
+            Aún no hay relacionados para mostrar.
+          </p>
         )}
       </section>
 
@@ -363,7 +431,11 @@ export default function ProductDetail() {
             </button>
 
             <div className="product__modalFrame">
-              <img className="product__modalImg" src={activeImg} alt={`${product.name} en grande`} />
+              <img
+                className="product__modalImg"
+                src={activeImg}
+                alt={`${product.name} en grande`}
+              />
             </div>
 
             <button
