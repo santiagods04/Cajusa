@@ -188,24 +188,111 @@
   font-weight: 700;
 }
 
-@media (max-width: 720px) {
-  .header__inner {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+/* Burger (hidden on desktop) */
+.header__burger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  background: #fff;
+  cursor: pointer;
+}
+
+.header__burger-icon {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+}
+
+.header__burger-icon::before,
+.header__burger-icon::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 18px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+}
+
+.header__burger-icon::before {
+  top: -6px;
+}
+
+.header__burger-icon::after {
+  top: 6px;
+}
+
+/* Backdrop */
+.header__backdrop_open {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 90;
+}
+
+/* Mobile Drawer */
+@media (max-width: 700px) {
+  .header__burger {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  /* si tu header ya es sticky/relative, esto ayuda a que no quede por debajo */
+  .header {
+    position: relative;
+    z-index: 110;
+  }
+
+  /* Ajuste suave del logo */
+  .header__logo {
+    max-width: 160px;
+    height: auto;
   }
 
   .header__nav {
+    position: fixed;
+    top: 0;
+    right: 0;
     margin-left: 0;
+    height: 100vh;
+    width: min(320px, 85vw);
+    padding: 88px 16px 16px; /* deja espacio para el header */
+    background: #f7f1e8; /* parecido a tu paleta */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transform: translateX(110%);
+    transition: transform 180ms ease;
+    z-index: 100;
+    overflow: auto;
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
   }
 
-  .header__logo {
-    height: 54px;
+  .header__nav_open {
+    transform: translateX(0);
+  }
+
+  /* Que los links ocupen ancho completo dentro del drawer */
+  .header__nav .link {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  /* El dropdown del user menu en móvil mejor “normal” y no flotante */
+  .header__user-menu {
+    width: 100%;
   }
 
   .header__user-menu-dropdown {
-    left: 0;
-    right: auto;
-    min-width: 220px;
+    position: static;
+    width: 100%;
+    margin-top: 8px;
   }
 }

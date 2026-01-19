@@ -18,7 +18,6 @@ export default function Footer() {
         <nav className="footer__nav" aria-label="Enlaces del sitio">
           <Link className="footer__link" to="/">Inicio</Link>
           <Link className="footer__link" to="/catalogo">Catálogo</Link>
-          <a className="footer__link" href="#contacto">Contacto</a>
         </nav>
 
         {/* CTA */}

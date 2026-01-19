@@ -7,8 +7,15 @@ export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Breakpoint del drawer móvil (mantener en sync con header.css)
+  const MOBILE_NAV_BP = 700;
+
+  // Dropdown del usuario (lo que ya tenías)
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
+
+  // Drawer mobile (hamburguesa)
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const { isLoggedIn, currentUser, handleSignOut } = useContext(AppContext);
   const role = currentUser?.role || "user";
@@ -32,14 +39,49 @@ export default function Header() {
     setIsMenuOpen((prev) => !prev);
   }
 
+  function toggleMobileNav() {
+    setIsMobileNavOpen((prev) => !prev);
+  }
+
+  function closeMobileNav() {
+    setIsMobileNavOpen(false);
+  }
+
   function onClickSignOut() {
+    // Cierra todo antes de salir (UX más limpia)
+    setIsMenuOpen(false);
+    setIsMobileNavOpen(false);
     handleSignOut();
   }
 
+  // Cierra dropdown + drawer al cambiar de ruta
   useEffect(() => {
     setIsMenuOpen(false);
+    setIsMobileNavOpen(false);
   }, [location.pathname]);
 
+  // Si el usuario cambia el tamaño de la ventana y sale de móvil,
+  // cerramos el drawer para evitar que "se abra solo" al volver a reducir.
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${MOBILE_NAV_BP}px)`);
+
+    function handleChange(e) {
+      if (!e.matches) setIsMobileNavOpen(false);
+    }
+
+    // Estado inicial (por si entra ya en desktop)
+    if (!mq.matches) setIsMobileNavOpen(false);
+
+    if (mq.addEventListener) mq.addEventListener("change", handleChange);
+    else mq.addListener(handleChange);
+
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", handleChange);
+      else mq.removeListener(handleChange);
+    };
+  }, [MOBILE_NAV_BP]);
+
+  // Cerrar dropdown al click afuera + ESC (y ESC también cierra drawer)
   useEffect(() => {
     function handleOutside(e) {
       if (!menuRef.current) return;
@@ -47,7 +89,10 @@ export default function Header() {
     }
 
     function handleEsc(e) {
-      if (e.key === "Escape") setIsMenuOpen(false);
+      if (e.key === "Escape") {
+        setIsMenuOpen(false);
+        setIsMobileNavOpen(false);
+      }
     }
 
     document.addEventListener("mousedown", handleOutside);
@@ -58,28 +103,76 @@ export default function Header() {
       document.removeEventListener("keydown", handleEsc);
     };
   }, []);
+
+  // (Opcional pero recomendado) bloquear scroll del body cuando drawer está abierto
+  useEffect(() => {
+    if (!isMobileNavOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isMobileNavOpen]);
+
   return (
     <header className="header">
+      {/* Backdrop solo cuando el drawer está abierto */}
+      {isMobileNavOpen && (
+        <div
+          className="header__backdrop_open"
+          onClick={closeMobileNav}
+          aria-hidden="true"
+        />
+      )}
+
       <div className="container header__inner">
-        <Link to="/" className="link">
+        <Link to="/" className="link" onClick={closeMobileNav}>
           <div className="header__brand">
             <img className="header__logo" src={logo} alt="Cajusa Boutique" />
           </div>
         </Link>
 
-        <nav className="header__nav">
-          <NavLink to="/" className="link" style={getNavStyle}>
+        {/* Botón hamburguesa (se muestra solo en móvil por CSS) */}
+        <button
+          type="button"
+          className="header__burger"
+          onClick={toggleMobileNav}
+          aria-label={isMobileNavOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={isMobileNavOpen}
+          aria-controls="header-nav"
+        >
+          <span className="header__burger-icon" aria-hidden="true" />
+        </button>
+
+        <nav
+          id="header-nav"
+          className={`header__nav${isMobileNavOpen ? " header__nav_open" : ""}`}
+        >
+          <NavLink
+            to="/"
+            className="link"
+            style={getNavStyle}
+            onClick={closeMobileNav}
+          >
             Inicio
           </NavLink>
-          <NavLink to="/catalog" className="link" style={getNavStyle}>
+
+          <NavLink
+            to="/catalog"
+            className="link"
+            style={getNavStyle}
+            onClick={closeMobileNav}
+          >
             Catálogo
           </NavLink>
+
           {!isLoggedIn ? (
             <Link
               to="/login"
               className="link"
               aria-current={isAuthRoute ? "page" : undefined}
               style={getNavStyle({ isActive: isAuthRoute })}
+              onClick={closeMobileNav}
             >
               Acceso
             </Link>
@@ -93,18 +186,27 @@ export default function Header() {
                 aria-expanded={isMenuOpen}
               >
                 {welcomeLabel}
-                <span className="header__user-menu-chevron" aria-hidden="true">▾</span>
+                <span className="header__user-menu-chevron" aria-hidden="true">
+                  ▾
+                </span>
               </button>
 
               {isMenuOpen && (
-                <div className="header__user-menu-dropdown" role="menu" aria-label="Menú de usuario">
+                <div
+                  className="header__user-menu-dropdown"
+                  role="menu"
+                  aria-label="Menú de usuario"
+                >
                   {menuItems.map((item) => (
                     <Link
                       key={item.to}
                       to={item.to}
                       className="header__user-menu-item"
                       role="menuitem"
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        closeMobileNav();
+                      }}
                     >
                       {item.label}
                     </Link>
