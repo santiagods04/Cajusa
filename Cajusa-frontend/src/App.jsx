@@ -77,6 +77,24 @@ function App() {
     setProductsError('');
   }
 
+  function onUpdatePersonalData(payload) {
+    return api.updatePersonalData(payload).then((updatedUser) => {
+      setCurrentUser(updatedUser);
+      return updatedUser;
+    });
+  }
+
+  function onUpdateEmail(payload) {
+    return api.updateEmail(payload).then((updatedUser) => {
+      setCurrentUser(updatedUser);
+      return updatedUser;
+    });
+  }
+
+  function onUpdatePassword(payload) {
+    return api.updatePassword(payload);
+  }
+
   useEffect(() => {
     const jwt = token.getToken();
     if (!jwt) return;
@@ -199,6 +217,9 @@ function App() {
     handleSignOut,
     handleLogin,
     handleRegistration,
+    onUpdatePersonalData,
+    onUpdateEmail,
+    onUpdatePassword,
     products,
     productsLoading,
     productsError,

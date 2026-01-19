@@ -68,6 +68,40 @@ class Api {
       headers: this._headersAuth(),
     }).then((res) => this._checkResponse(res));
   }
+
+  updatePersonalData({ name, nickname, phone }) {
+    this._checkUrl();
+
+    return fetch(`${this._url}/users/me`, {
+      method: "PATCH",
+      headers: this._headersAuth(),
+      body: JSON.stringify({ name, nickname, phone }),
+    }).then((res) => this._checkResponse(res));
+  }
+
+  updateEmail({ email }) {
+    this._checkUrl();
+
+    return fetch(`${this._url}/users/me/email`, {
+      method: "PATCH",
+      headers: this._headersAuth(),
+      body: JSON.stringify({ email }),
+    }).then((res) => this._checkResponse(res));
+  }
+
+  updatePassword({ currentPassword, newPassword, confirmNewPassword }) {
+    this._checkUrl();
+
+    return fetch(`${this._url}/users/me/password`, {
+      method: "PATCH",
+      headers: this._headersAuth(),
+      body: JSON.stringify({
+        currentPassword,
+        newPassword,
+        confirmNewPassword,
+      }),
+    }).then((res) => this._checkResponse(res));
+  }
   // ======================
   // PRODUCTS
   // ======================
