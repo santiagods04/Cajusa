@@ -623,6 +623,53 @@
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 
+/* =========================
+   Css Infotooltip
+   ========================= */
+.popup__infotooltip {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.popup__infotooltip-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.popup__infotooltip-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+.popup__infotooltip-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.popup__infotooltip-button {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: transparent;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.08s ease, opacity 0.15s ease;
+}
+
+.popup__infotooltip-button:hover {
+  opacity: 0.9;
+}
+
+.popup__infotooltip-button:active {
+  transform: scale(0.98);
+}
 
 
 /* =========================

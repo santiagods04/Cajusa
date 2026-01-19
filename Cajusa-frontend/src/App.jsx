@@ -146,6 +146,14 @@ function App() {
       });
   }
 
+  function openInfoToolTipPopup({
+    title = "En construcción",
+    message = "En construcción, visítame en una próxima ocasión",
+  } = {}) {
+    setPopupProps({ title, message });
+    setActivePopup("info-tooltip");
+  }
+
   function openCreateProductPopup() {
     setPopupProps({ mode: "create", product: null });
     setActivePopup("product-form");
@@ -231,6 +239,7 @@ function App() {
     popupProps,
     openCreateProductPopup,
     openEditProductPopup,
+    openInfoToolTipPopup,
     closePopup,
     activeOverlay,
     overlayProps,

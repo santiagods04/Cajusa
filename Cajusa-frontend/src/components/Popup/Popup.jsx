@@ -2,6 +2,7 @@
 import { useEffect, useContext } from 'react';
 import AppContext from '../../context/AppContext';
 import ProductForm from '../Popup/ProductForm/ProductForm';
+import InfoToolTip from "./InfoToolTip/InfoToolTip";
 
 function Popup() {
 
@@ -22,8 +23,6 @@ function Popup() {
 
         function handleEsc(e) {
             if (e.key !== 'Escape') return;
-
-            // Si hay overlay encima, no cierres el form
             if (activeOverlay) return;
 
             closePopup?.();
@@ -39,17 +38,27 @@ function Popup() {
 
     if (!isOpen) return null;
 
-    // Para este caso:
     const isProductForm = activePopup === "product-form";
+    const isInfoToolTip = activePopup === "info-tooltip";
+
     const mode = popupProps?.mode || "create";
     const product = popupProps?.product || null;
 
-    const title = mode === "create" ? "Crear producto" : "Actualizar producto";
-    const submitText = mode === "create" ? "Crear" : "Actualizar";
+    const formTitle = mode === "create" ? "Crear producto" : "Actualizar producto";
+    const formSubmitText = mode === "create" ? "Crear" : "Actualizar";
+
+    const infoTitle = popupProps?.title || "En construcción";
+    const infoMessage = popupProps?.message || "En construcción, visítame en una próxima ocasión";
+
+    const title = isInfoToolTip ? infoTitle : formTitle;
+    const containerTypeClass = isInfoToolTip
+        ? "popup__container_type_tooltip"
+        : "popup__container_type_form"
+        ;
 
     return (
         <div className={`popup popup_opened`} onMouseDown={handleOverlayClick}>
-            <div className="popup__container popup__container_type_form">
+            <div className={`popup__container ${containerTypeClass}`}>
                 <button
                     type="button"
                     className="popup__close"
@@ -64,10 +73,19 @@ function Popup() {
                         <ProductForm
                             key={`${mode}-${product?._id || "new"}`}
                             initialValues={mode === "edit" ? product : undefined}
-                            submitText={submitText}
+                            submitText={formSubmitText}
                             onSubmit={handleProductSubmit}
                             isSubmitting={productSubmitLoading}
                             submitError={productSubmitError}
+                        />
+                    )}
+
+                    {isInfoToolTip && (
+                        <InfoToolTip
+                            title={infoTitle}
+                            message={infoMessage}
+                            onOk={popupProps?.onOk}
+                            onClose={closePopup}
                         />
                     )}
                 </div>
