@@ -1,6 +1,12 @@
 import { Link } from "react-router-dom";
-import { useEffect, useMemo, useRef, useState, useLayoutEffect } from "react";
-import { getProducts } from "../../services/productsService";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useLayoutEffect,
+  useContext,
+} from "react";
+import AppContext from "../../context/AppContext";
 
 function formatCOP(value) {
   if (typeof value !== "number") return null;
@@ -12,15 +18,31 @@ function formatCOP(value) {
 }
 
 export default function Home() {
-  const [products, setProducts] = useState([]);
-  const [error, setError] = useState("");
+  const {
+    products: ctxProducts,
+    productsLoading,
+    productsError,
+    onProductsReload,
+  } = useContext(AppContext) || {};
 
+  const products = Array.isArray(ctxProducts) ? ctxProducts : [];
+  const didFetchRef = useRef(false);
+
+  // ✅ Importante: NO dejes este effect con [].
+  // Si onProductsReload llega después por Context, con [] no vuelve a correr y se queda sin cargar.
   useEffect(() => {
-    setError("");
-    getProducts()
-      .then(setProducts)
-      .catch((e) => setError(e?.message || "Error cargando productos"));
-  }, []);
+    if (didFetchRef.current) return;
+
+    if (products.length > 0) {
+      didFetchRef.current = true;
+      return;
+    }
+
+    if (typeof onProductsReload !== "function") return;
+
+    didFetchRef.current = true;
+    onProductsReload({ page: 1, limit: 200, sort: "-createdAt" }).catch(() => {});
+  }, [products.length, onProductsReload]);
 
   const featured = useMemo(() => products.slice(0, 6), [products]);
   const heroProduct = featured[0];
@@ -35,20 +57,38 @@ export default function Home() {
   const carouselRef = useRef(null);
   const rafRef = useRef(0);
   const pausedRef = useRef(false);
+  const isHoveringRef = useRef(false);
+
+  // =========================
+  // ✅ FIX DESTACADOS (LOOP)
+  // =========================
+  // Antes: 3 repeticiones fijas + segment = scrollWidth/3.
+  // Con pocos productos reales (2-4), el rail queda corto, normalize “clava” el scroll y se siente bloqueado.
+  // Solución: repetir más (ej. 5) y calcular el segmento con ese número, manteniéndonos en el segmento del medio.
+  const FEATURED_REPEAT = 5;
+  const FEATURED_MID = Math.floor(FEATURED_REPEAT / 2);
 
   const loopedFeatured = useMemo(() => {
     if (!featured.length) return [];
-    return [...featured, ...featured, ...featured];
+    const out = [];
+    for (let i = 0; i < FEATURED_REPEAT; i += 1) out.push(...featured);
+    return out;
   }, [featured]);
 
+  // Carrusel HERO: seleccionar productos reales con imagen y randomizar el orden.
   const heroGallery = useMemo(() => {
-    const list = products
+    const list = (Array.isArray(products) ? products : [])
       .map((p) => ({
-        id: p.id,
+        id: p._id || p.id,
         name: p.name,
         img: Array.isArray(p.images) ? p.images[0] : null,
       }))
       .filter((x) => x.img);
+
+    for (let i = list.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
 
     return list.slice(0, 10);
   }, [products]);
@@ -80,14 +120,18 @@ export default function Home() {
   }, [heroGallery.length]);
 
   const BUFFER = 24;
-  const getSegment = (el) => el.scrollWidth / 3;
+  const getSegment = (el) => el.scrollWidth / FEATURED_REPEAT;
 
   const normalize = (el) => {
     const segment = getSegment(el);
     const max = el.scrollWidth - el.clientWidth;
 
-    const leftLimit = Math.max(0, segment - BUFFER);
-    const rightLimit = Math.min(max, segment * 2 + BUFFER);
+    // ✅ Con pocos items, a veces max/segment quedan en 0 -> evitamos cálculos raros
+    if (max <= 0 || segment <= 0) return;
+
+    // ✅ límites alrededor del segmento del medio
+    const leftLimit = Math.max(0, segment * FEATURED_MID - BUFFER);
+    const rightLimit = Math.min(max, segment * (FEATURED_MID + 1) + BUFFER);
 
     if (el.scrollLeft <= leftLimit) {
       el.style.scrollBehavior = "auto";
@@ -102,15 +146,35 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
+  const railInitRef = useRef(false);
+
+  useLayoutEffect(() => {
     const el = railRef.current;
     if (!el || !featured.length) return;
 
-    requestAnimationFrame(() => {
+    const center = () => {
       el.style.scrollBehavior = "auto";
-      el.scrollLeft = getSegment(el);
+      // ✅ centrar en el segmento del medio
+      el.scrollLeft = getSegment(el) * FEATURED_MID;
       el.style.scrollBehavior = "";
-    });
+      normalize(el);
+    };
+
+    requestAnimationFrame(center);
+
+    // Solo durante el arranque (carga de imágenes) re-centra si cambia el tamaño
+    if (railInitRef.current) return;
+    railInitRef.current = true;
+
+    const ro = new ResizeObserver(() => requestAnimationFrame(center));
+    ro.observe(el);
+
+    const t = setTimeout(() => ro.disconnect(), 1200);
+
+    return () => {
+      clearTimeout(t);
+      ro.disconnect();
+    };
   }, [featured.length]);
 
   useEffect(() => {
@@ -136,8 +200,14 @@ export default function Home() {
 
     rafRef.current = requestAnimationFrame(tick);
 
-    const pause = () => { pausedRef.current = true; };
-    const resume = () => { pausedRef.current = false; };
+    const pause = () => {
+      pausedRef.current = true;
+      isHoveringRef.current = true;
+    };
+    const resume = () => {
+      pausedRef.current = false;
+      isHoveringRef.current = false;
+    };
 
     hoverEl.addEventListener("mouseenter", pause);
     hoverEl.addEventListener("mouseleave", resume);
@@ -158,6 +228,9 @@ export default function Home() {
     const el = railRef.current;
     if (!el) return;
 
+    // pausa mientras hace el scroll smooth
+    pausedRef.current = true;
+
     const card = el.querySelector(".home__mini-card");
     const gap = 14;
     const step = card
@@ -166,15 +239,17 @@ export default function Home() {
 
     el.scrollBy({ left: dir * step, behavior: "smooth" });
 
-    setTimeout(() => normalize(el), 350);
+    setTimeout(() => {
+      normalize(el);
+      // si el mouse sigue encima, se queda pausado; si no, reanuda
+      pausedRef.current = isHoveringRef.current;
+    }, 450);
   };
-
 
   return (
     <div className="container">
       {/* HERO */}
       <section className="home__hero">
-        {/* Fondo difuminado (solo si hay imagen) */}
         {heroProduct?.images?.[0] ? (
           <div
             className="home__hero-bg"
@@ -199,23 +274,19 @@ export default function Home() {
           </ul>
 
           <div className="home__actions">
-            <Link to="/catalogo" className="link">
+            <Link to="/catalog" className="link">
               <button className="btn btn-primary" type="button">Ver Catálogo</button>
-            </Link>
-
-            <Link to="/catalogo?line=antifluido" className="link">
-              <button className="btn btn-ghost" type="button">Antifluido</button>
-            </Link>
-
-            <Link to="/catalogo?line=lino" className="link">
-              <button className="btn btn-ghost" type="button">Lino artesanal</button>
             </Link>
           </div>
         </div>
 
         <div className="home__hero-right">
           <div className="home__hero-gallery">
-            <div className="home__hero-track" ref={heroTrackRef} style={{ "--heroDuration": heroDuration }}>
+            <div
+              className="home__hero-track"
+              ref={heroTrackRef}
+              style={{ "--heroDuration": heroDuration }}
+            >
               {heroLoop.map((item, idx) => (
                 <div className="home__hero-slide" key={`${item.id}-${idx}`}>
                   <div className="home__hero-frame">
@@ -242,10 +313,12 @@ export default function Home() {
           </span>
         </div>
 
-        {error ? (
-          <div className="state">Error: {error}</div>
-        ) : featured.length === 0 ? (
+        {productsError ? (
+          <div className="state">Error: {productsError}</div>
+        ) : productsLoading && featured.length === 0 ? (
           <div className="state">Cargando productos…</div>
+        ) : featured.length === 0 ? (
+          <div className="state">Aún no hay productos.</div>
         ) : (
           <div className="home__carousel" ref={carouselRef}>
             <button
@@ -264,10 +337,19 @@ export default function Home() {
                 const badgeText = getBadgeText(p.line);
 
                 return (
-                  <Link key={`${p.id}-${idx}`} className="home__mini-card link" to={`/producto/${p.id}`}>
+                  <Link
+                    key={`${p._id || p.id}-${idx}`}
+                    className="home__mini-card link"
+                    to={`/product/${p._id || p.id}`}
+                  >
                     <div className={`home__mini-media ${img ? "" : "home__mini-media--placeholder"}`}>
                       {img ? (
-                        <img className="home__mini-img" src={img} alt={p.name || "Producto"} loading="lazy" />
+                        <img
+                          className="home__mini-img"
+                          src={img}
+                          alt={p.name || "Producto"}
+                          loading="lazy"
+                        />
                       ) : (
                         <div className="home__mini-placeholder">
                           {(p.name || "C").slice(0, 1).toUpperCase()}
