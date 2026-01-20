@@ -41,7 +41,7 @@ export default function Home() {
     if (typeof onProductsReload !== "function") return;
 
     didFetchRef.current = true;
-    onProductsReload({ page: 1, limit: 200, sort: "-createdAt" }).catch(() => {});
+    onProductsReload({ page: 1, limit: 200, sort: "-createdAt" }).catch(() => { });
   }, [products.length, onProductsReload]);
 
   const featured = useMemo(() => products.slice(0, 6), [products]);
@@ -65,7 +65,13 @@ export default function Home() {
   // Antes: 3 repeticiones fijas + segment = scrollWidth/3.
   // Con pocos productos reales (2-4), el rail queda corto, normalize “clava” el scroll y se siente bloqueado.
   // Solución: repetir más (ej. 5) y calcular el segmento con ese número, manteniéndonos en el segmento del medio.
-  const FEATURED_REPEAT = 5;
+  const baseCount = featured.length;
+  const FEATURED_REPEAT = useMemo(() => {
+    if (baseCount <= 4) return 7;
+    if (baseCount <= 8) return 5;
+    return 3;
+  }, [baseCount]);
+  
   const FEATURED_MID = Math.floor(FEATURED_REPEAT / 2);
 
   const loopedFeatured = useMemo(() => {
