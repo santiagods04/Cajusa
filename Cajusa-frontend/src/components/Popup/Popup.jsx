@@ -65,7 +65,7 @@ function Popup() {
                     : "";
 
     return (
-        <div className={`popup popup_opened`} onMouseDown={handleOverlayClick}>
+        <div className={`popup popup__opened`} onMouseDown={handleOverlayClick}>
             <div className={`popup__container ${containerTypeClass}`}>
                 <button
                     type="button"

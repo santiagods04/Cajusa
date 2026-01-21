@@ -239,6 +239,10 @@
 
 /* Mobile Drawer */
 @media (max-width: 700px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
   .header__burger {
     display: inline-flex;
     margin-left: auto;
@@ -257,22 +261,26 @@
   }
 
   .header__nav {
-    position: fixed;
-    top: 0;
-    right: 0;
-    margin-left: 0;
-    height: 100vh;
-    width: min(320px, 85vw);
-    padding: 88px 16px 16px; 
-    background: #f7f1e8; 
     display: flex;
     flex-direction: column;
     gap: 10px;
-    transform: translateX(110%);
-    transition: transform 180ms ease;
-    z-index: 100;
-    overflow: auto;
-    border-left: 1px solid rgba(0, 0, 0, 0.08);
+
+    position: fixed;
+    top: 64px;
+    right: 16px;
+
+    width: min(320px, 85vw);
+    max-width: calc(100vw - 32px);
+
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.16);
+
+    transform: translateX(calc(100% + 32px));
+    transition: transform 0.2s ease;
+    z-index: 1100;
   }
 
   .header__nav_open {
