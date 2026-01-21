@@ -7,14 +7,12 @@ export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Breakpoint del drawer móvil (mantener en sync con header.css)
   const MOBILE_NAV_BP = 700;
 
-  // Dropdown del usuario (lo que ya tenías)
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
-  // Drawer mobile (hamburguesa)
+
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const { isLoggedIn, currentUser, handleSignOut } = useContext(AppContext);
@@ -48,20 +46,17 @@ export default function Header() {
   }
 
   function onClickSignOut() {
-    // Cierra todo antes de salir (UX más limpia)
+
     setIsMenuOpen(false);
     setIsMobileNavOpen(false);
     handleSignOut();
   }
 
-  // Cierra dropdown + drawer al cambiar de ruta
   useEffect(() => {
     setIsMenuOpen(false);
     setIsMobileNavOpen(false);
   }, [location.pathname]);
 
-  // Si el usuario cambia el tamaño de la ventana y sale de móvil,
-  // cerramos el drawer para evitar que "se abra solo" al volver a reducir.
   useEffect(() => {
     const mq = window.matchMedia(`(max-width: ${MOBILE_NAV_BP}px)`);
 
@@ -69,7 +64,6 @@ export default function Header() {
       if (!e.matches) setIsMobileNavOpen(false);
     }
 
-    // Estado inicial (por si entra ya en desktop)
     if (!mq.matches) setIsMobileNavOpen(false);
 
     if (mq.addEventListener) mq.addEventListener("change", handleChange);
@@ -81,7 +75,6 @@ export default function Header() {
     };
   }, [MOBILE_NAV_BP]);
 
-  // Cerrar dropdown al click afuera + ESC (y ESC también cierra drawer)
   useEffect(() => {
     function handleOutside(e) {
       if (!menuRef.current) return;
@@ -104,7 +97,6 @@ export default function Header() {
     };
   }, []);
 
-  // (Opcional pero recomendado) bloquear scroll del body cuando drawer está abierto
   useEffect(() => {
     if (!isMobileNavOpen) return;
     const prev = document.body.style.overflow;
@@ -116,7 +108,6 @@ export default function Header() {
 
   return (
     <header className="header">
-      {/* Backdrop solo cuando el drawer está abierto */}
       {isMobileNavOpen && (
         <div
           className="header__backdrop_open"
@@ -132,7 +123,6 @@ export default function Header() {
           </div>
         </Link>
 
-        {/* Botón hamburguesa (se muestra solo en móvil por CSS) */}
         <button
           type="button"
           className="header__burger"

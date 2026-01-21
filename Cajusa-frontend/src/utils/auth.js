@@ -10,8 +10,7 @@ const checkResponse = async (res) => {
     return Promise.reject(new Error(`Error: ${res.status}`));
   }
 };
-
-// Registro: el front YA manda name y phone unidos
+//Register
 export const register = ({ name, nickname, email, password, confirmPassword, phone }) => {
   const payload = {
     name: normalizeText(name),
@@ -29,7 +28,7 @@ export const register = ({ name, nickname, email, password, confirmPassword, pho
   }).then(checkResponse);
 };
 
-// Login => { token }
+// Login 
 export const login = ({ email, password }) => {
   const payload = {
     email: normalizeEmail(email),

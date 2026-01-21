@@ -238,7 +238,7 @@
 }
 
 .catalog__badge--lino::before{
-  background: rgba(177, 74, 47, 1);; /* sage */
+  background: rgba(177, 74, 47, 1);; 
 }
 
 .catalog__card-body {

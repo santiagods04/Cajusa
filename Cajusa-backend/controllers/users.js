@@ -60,7 +60,6 @@ const updatePersonalData = (req, res, next) => {
       if (err.name === 'DocumentNotFoundError') {
         return next(new NotFoundError('Usuario no encontrado'));
       }
-      // Celebrate ya te tira 400 con "Datos inválidos", pero por si algo se cuela:
       if (err.name === 'ValidationError') {
         return next(new BadRequestError('Datos inválidos'));
       }

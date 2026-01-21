@@ -28,8 +28,6 @@ export default function Home() {
   const products = Array.isArray(ctxProducts) ? ctxProducts : [];
   const didFetchRef = useRef(false);
 
-  // ✅ Importante: NO dejes este effect con [].
-  // Si onProductsReload llega después por Context, con [] no vuelve a correr y se queda sin cargar.
   useEffect(() => {
     if (didFetchRef.current) return;
 
@@ -59,12 +57,6 @@ export default function Home() {
   const pausedRef = useRef(false);
   const isHoveringRef = useRef(false);
 
-  // =========================
-  // ✅ FIX DESTACADOS (LOOP)
-  // =========================
-  // Antes: 3 repeticiones fijas + segment = scrollWidth/3.
-  // Con pocos productos reales (2-4), el rail queda corto, normalize “clava” el scroll y se siente bloqueado.
-  // Solución: repetir más (ej. 5) y calcular el segmento con ese número, manteniéndonos en el segmento del medio.
   const baseCount = featured.length;
   const FEATURED_REPEAT = useMemo(() => {
     if (baseCount <= 4) return 7;
@@ -81,7 +73,6 @@ export default function Home() {
     return out;
   }, [featured]);
 
-  // Carrusel HERO: seleccionar productos reales con imagen y randomizar el orden.
   const heroGallery = useMemo(() => {
     const list = (Array.isArray(products) ? products : [])
       .map((p) => ({
@@ -132,10 +123,8 @@ export default function Home() {
     const segment = getSegment(el);
     const max = el.scrollWidth - el.clientWidth;
 
-    // ✅ Con pocos items, a veces max/segment quedan en 0 -> evitamos cálculos raros
     if (max <= 0 || segment <= 0) return;
 
-    // ✅ límites alrededor del segmento del medio
     const leftLimit = Math.max(0, segment * FEATURED_MID - BUFFER);
     const rightLimit = Math.min(max, segment * (FEATURED_MID + 1) + BUFFER);
 
@@ -160,7 +149,6 @@ export default function Home() {
 
     const center = () => {
       el.style.scrollBehavior = "auto";
-      // ✅ centrar en el segmento del medio
       el.scrollLeft = getSegment(el) * FEATURED_MID;
       el.style.scrollBehavior = "";
       normalize(el);
@@ -168,7 +156,6 @@ export default function Home() {
 
     requestAnimationFrame(center);
 
-    // Solo durante el arranque (carga de imágenes) re-centra si cambia el tamaño
     if (railInitRef.current) return;
     railInitRef.current = true;
 
@@ -234,7 +221,6 @@ export default function Home() {
     const el = railRef.current;
     if (!el) return;
 
-    // pausa mientras hace el scroll smooth
     pausedRef.current = true;
 
     const card = el.querySelector(".home__mini-card");
@@ -247,7 +233,6 @@ export default function Home() {
 
     setTimeout(() => {
       normalize(el);
-      // si el mouse sigue encima, se queda pausado; si no, reanuda
       pausedRef.current = isHoveringRef.current;
     }, 450);
   };

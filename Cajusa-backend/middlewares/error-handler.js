@@ -27,7 +27,7 @@ module.exports = (err, req, res, next) => {
   if (isCelebrateError(err)) {
     err.statusCode = 400;
 
-    const first = err.details.values().next().value; // Joi error
+    const first = err.details.values().next().value; 
     const detail = first?.details?.[0];
 
     err.message = detail?.message

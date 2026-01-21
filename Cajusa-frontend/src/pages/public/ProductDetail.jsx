@@ -11,15 +11,13 @@ export default function ProductDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Selección (NO va dentro de product)
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
 
-  // Slider
+
   const [activeIndex, setActiveIndex] = useState(0);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
 
-  // Relacionados (opcional)
   const [related, setRelated] = useState([]);
 
   useEffect(() => {
@@ -48,7 +46,6 @@ export default function ProductDetail() {
 
         setProduct(mapped);
 
-        // ✅ importantísimo: al cambiar de producto, resetea selección
         setSize("");
         setColor("");
         setActiveIndex(0);
@@ -60,7 +57,6 @@ export default function ProductDetail() {
       .finally(() => setIsLoading(false));
   }, [id, getProductByIdRaw]);
 
-  // Normaliza imágenes: soporta strings o {url}/{src}
   const images = useMemo(() => {
     const raw = product?.images;
 
@@ -77,7 +73,6 @@ export default function ProductDetail() {
     return single ? [single] : [];
   }, [product]);
 
-  // Corrige index si cambian imágenes
   useEffect(() => {
     if (!images.length) return;
     setActiveIndex((prev) => Math.min(prev, images.length - 1));
@@ -96,7 +91,6 @@ export default function ProductDetail() {
     setActiveIndex((i) => (i + 1) % images.length);
   };
 
-  // ESC para cerrar modal
   useEffect(() => {
     if (!isZoomOpen) return;
 
@@ -108,10 +102,8 @@ export default function ProductDetail() {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isZoomOpen, images.length]);
 
-  // Variantes (tallas/colores) - si quieres solo disponibles, filtra por v.available
   const sizes = useMemo(() => {
     if (!product?.variants) return [];
     return [...new Set(product.variants.map((v) => v.size))].filter(Boolean);
@@ -126,7 +118,6 @@ export default function ProductDetail() {
   const needsVariant =
     Array.isArray(product?.variants) && product.variants.length > 0;
 
-  // ✅ AQUÍ estaba el bug: estabas mirando product.size/product.color
   const canBuy = !needsVariant || (size && color);
 
   const lineLabel =
@@ -162,14 +153,12 @@ export default function ProductDetail() {
     openWhatsApp(waText);
   }
 
-  // Relacionados (100% back) usando getProductsRaw si existe en contexto
   useEffect(() => {
     setRelated([]);
 
     if (!product) return;
     if (typeof getProductsRaw !== "function") return;
 
-    // trae por misma linea/categoría para no traer TODO
     const params = {
       page: 1,
       limit: 20,

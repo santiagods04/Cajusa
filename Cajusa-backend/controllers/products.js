@@ -44,12 +44,10 @@ const getProducts = (req, res, next) => {
   if (subcategories.length)
     filter.subcategory = { $in: subcategories.map(toExactRegexI) };
 
-  // tags: igual aplica (y como es array en el doc, $in funciona bien con regex)
   if (tags.length) filter.tags = { $in: tags.map(toExactRegexI) };
 
   if (q) filter.name = { $regex: String(q), $options: "i" };
 
-  // Filtrar por variantes (size/color/available)
   if (size || color || typeof available !== "undefined") {
     const v = {};
     if (size) v.size = String(size);

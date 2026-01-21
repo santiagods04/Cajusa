@@ -27,7 +27,6 @@ export default function Products() {
         if (!Array.isArray(products) || products.length === 0) {
             onProductsReload?.();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const rows = useMemo(() => (Array.isArray(products) ? products : []), [products]);

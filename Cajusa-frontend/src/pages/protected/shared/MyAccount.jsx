@@ -1,8 +1,8 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import AppContext from "../../../context/AppContext";
 
-const PHONE_RE = /^\+[1-9]\d{7,14}$/; // + y 8-15 digitos (E.164)
-const PASS_SAFE_RE = /^(?=.*[A-Z])(?=.*\d).{8,}$/; // 8+ con 1 mayuscula y 1 numero
+const PHONE_RE = /^\+[1-9]\d{7,14}$/; 
+const PASS_SAFE_RE = /^(?=.*[A-Z])(?=.*\d).{8,}$/; 
 
 function getErrMessage(err, fallback = "Ocurrió un error") {
   if (!err) return fallback;
@@ -29,9 +29,7 @@ export default function MyAccount() {
 
   const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
 
-  // -------------------------
-  // Form states (controlados)
-  // -------------------------
+
   const [personal, setPersonal] = useState({ name: "", nickname: "", phone: "" });
   const [sessionEmail, setSessionEmail] = useState({ email: "" });
   const [passwords, setPasswords] = useState({
@@ -40,9 +38,7 @@ export default function MyAccount() {
     confirmNewPassword: "",
   });
 
-  // -------------------------
-  // UI state (loading + msgs)
-  // -------------------------
+
   const [personalLoading, setPersonalLoading] = useState(false);
   const [personalError, setPersonalError] = useState("");
   const [personalOk, setPersonalOk] = useState("");
@@ -55,7 +51,6 @@ export default function MyAccount() {
   const [passError, setPassError] = useState("");
   const [passOk, setPassOk] = useState("");
 
-  // Prefill desde currentUser (para que no se quede en blanco)
   useEffect(() => {
     if (!currentUser) return;
 
@@ -70,9 +65,7 @@ export default function MyAccount() {
     });
   }, [currentUser]);
 
-  // -------------------------
-  // Handlers submit
-  // -------------------------
+
   const handleSubmitPersonal = (e) => {
     e.preventDefault();
     setPersonalError("");
@@ -174,9 +167,6 @@ export default function MyAccount() {
       .finally(() => setPassLoading(false));
   };
 
-  // -------------------------
-  // Direcciones (NO TOCADO)
-  // -------------------------
   function renderAddressesSection() {
     return (
       <section className="my-account__section" aria-labelledby="my-account-address">

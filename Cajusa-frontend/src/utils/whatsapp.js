@@ -37,10 +37,8 @@ export function openWhatsApp(text, phone = WHATSAPP_PHONE, { timeout = 1400 } = 
   window.addEventListener("pagehide", markAway, { once: true });
   document.addEventListener("visibilitychange", onVis, { once: true });
 
-  // 1) intenta abrir app
   window.location.href = appUrl;
 
-  // 2) fallback SOLO si seguimos aquí (visibles + con foco)
   setTimeout(() => {
     cleanup();
 

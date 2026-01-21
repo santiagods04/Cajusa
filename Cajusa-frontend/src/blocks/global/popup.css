@@ -62,10 +62,10 @@
 
 .popup__container_type_form .popup__content {
   flex: 1 1 auto;
-  min-height: 0;          /* clave en flex para que sí pueda encoger */
+  min-height: 0;          
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-bottom: 16px;   /* evita que lo último quede tapado */
+  padding-bottom: 16px;   
 }
 
 .popup__container_type_form .popup__form {
@@ -324,7 +324,7 @@
 .popup__thumb-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;   /* o 'contain' si prefieres sin recorte */
+  object-fit: cover;   
   display: block;
 }
 
@@ -570,7 +570,7 @@
   height: 26px;
   padding: 0;
 
-  border: 2px solid #fff;      /* borde tipo “tag” */
+  border: 2px solid #fff;      
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.85);
   cursor: pointer;

@@ -138,7 +138,7 @@
 
 @keyframes heroMarquee{
   from { transform: translate3d(0, 0, 0); }
-  to   { transform: translate3d(var(--heroShift, -50%), 0, 0); } /* como son 2 copias, -50% = una copia exacta */
+  to   { transform: translate3d(var(--heroShift, -50%), 0, 0); } 
 }
 
 .home__hero-track{

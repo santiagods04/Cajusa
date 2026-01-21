@@ -80,7 +80,6 @@
   border-radius: 18px;
   overflow: hidden;
 
-  /* matte suave que combina con tu layout */
   background: radial-gradient(
     circle at 30% 20%,
     rgba(255,255,255,0.22),
@@ -120,7 +119,6 @@
   font-size: 14px;
 }
 
-/* Botones nav (main) */
 .product__navBtn {
   position: absolute;
   top: 50%;
@@ -155,7 +153,6 @@
   font-size: 12px;
 }
 
-/* Panel derecho */
 .product__info .page__title {
   margin-top: 0;
 }
@@ -274,7 +271,6 @@
 
 .product__modal {
   position: relative;
-  /* IMPORTANTÍSIMO: no fuerces height aquí */
   width: min(600px, 92vw, calc(88vh * 4 / 5));
   background: transparent;
   border: 0;
@@ -285,7 +281,6 @@
 
 .product__modalFrame {
   width: 100%;
-  /* Mantén proporción como tu main (ajústala si tu frame no es 4/5) */
   aspect-ratio: 4 / 5;
 
   border-radius: 18px;

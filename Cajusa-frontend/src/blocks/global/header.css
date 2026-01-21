@@ -244,13 +244,13 @@
     margin-left: auto;
   }
 
-  /* si tu header ya es sticky/relative, esto ayuda a que no quede por debajo */
+  
   .header {
     position: relative;
     z-index: 110;
   }
 
-  /* Ajuste suave del logo */
+  
   .header__logo {
     max-width: 160px;
     height: auto;
@@ -263,8 +263,8 @@
     margin-left: 0;
     height: 100vh;
     width: min(320px, 85vw);
-    padding: 88px 16px 16px; /* deja espacio para el header */
-    background: #f7f1e8; /* parecido a tu paleta */
+    padding: 88px 16px 16px; 
+    background: #f7f1e8; 
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -279,13 +279,13 @@
     transform: translateX(0);
   }
 
-  /* Que los links ocupen ancho completo dentro del drawer */
+  
   .header__nav .link {
     width: 100%;
     justify-content: flex-start;
   }
 
-  /* El dropdown del user menu en móvil mejor “normal” y no flotante */
+ 
   .header__user-menu {
     width: 100%;
   }

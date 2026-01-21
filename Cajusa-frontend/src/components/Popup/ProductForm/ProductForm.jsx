@@ -132,7 +132,6 @@ function ProductForm({
 
                 if (list.length === 0) return "Agrega al menos 1 variante.";
 
-                // opcional pero recomendado: blindaje por si llegan duplicadas desde initialValues
                 const seen = new Set();
                 for (const v of list) {
                     const key = `${String(v.size || "").trim().toLowerCase()}__${String(v.color || "").trim().toLowerCase()}`;
@@ -184,7 +183,6 @@ function ProductForm({
                 const ne = { ...e };
 
                 fieldsToValidate.forEach((f) => {
-                    // si hay forcedErrors para ese campo, gana
                     if (forcedErrors && Object.prototype.hasOwnProperty.call(forcedErrors, f)) {
                         ne[f] = forcedErrors[f];
                         return;
@@ -420,7 +418,6 @@ function ProductForm({
         const rawValue = raw && raw.target ? undefined : raw;
         const text = normalizeTag(rawValue ?? tagDraft);
 
-        // 1) vacío
         if (!text) {
             commit((prev) => prev, ["tags"], { tags: "Escribe un tag primero." });
             return;
@@ -428,20 +425,17 @@ function ProductForm({
 
         const current = Array.isArray(values.tags) ? values.tags : [];
 
-        // 2) límite
         if (current.length >= MAX_TAGS) {
             commit((prev) => prev, ["tags"], { tags: `Máximo ${MAX_TAGS} tags.` });
             return;
         }
 
-        // 3) duplicado (comparación normalizada)
         const exists = current.some((t) => normalizeTag(t) === text);
         if (exists) {
             commit((prev) => prev, ["tags"], { tags: "Ese tag ya existe." });
             return;
         }
 
-        // 4) ok: guardas y validas con commit
         commit(
             (prev) => {
                 const prevTags = Array.isArray(prev.tags) ? prev.tags : [];
@@ -734,7 +728,7 @@ function ProductForm({
 
                     {(values.images.length > 0 || values.newImages.length > 0) && (
                         <div className="popup__thumbs">
-                            {/* tu render de thumbs EXISTING */}
+                            {/* thumbs EXISTING */}
                             {values.images.map(function (url) {
                                 return (
                                     <div className="popup__thumb" key={url}>
@@ -756,7 +750,7 @@ function ProductForm({
                                 );
                             })}
 
-                            {/* tu render de thumbs NEW */}
+                            {/*thumbs NEW */}
                             {values.newImages.map(function (item) {
                                 return (
                                     <div className="popup__thumb" key={item.url}>

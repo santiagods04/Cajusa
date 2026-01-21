@@ -27,20 +27,16 @@ export default function Catalog() {
 
   const products = Array.isArray(ctxProducts) ? ctxProducts : [];
 
-  // Search
   const [queryDraft, setQueryDraft] = useState("");
   const [query, setQuery] = useState("");
 
-  // Filtros (categoría/subcategoría multi; talla/color single)
   const [selectedCategories, setSelectedCategories] = useState(new Set());
   const [selectedSubcategories, setSelectedSubcategories] = useState(new Set());
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
 
-  // Productos base para construir opciones (depende SOLO de line)
   const [baseProducts, setBaseProducts] = useState([]);
 
-  // --- helpers ---
   const toggleInSet = (setter, value) => {
     setter((prev) => {
       const next = new Set(prev);
@@ -66,12 +62,10 @@ export default function Catalog() {
     setQueryDraft("");
   };
 
-  // Si cambia la línea, limpiamos filtros (para evitar combinaciones inválidas)
   useEffect(() => {
     clearSidebarFilters();
-  }, [line]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [line]); 
 
-  // 1) Cargar BASE por línea (para opciones)
   useEffect(() => {
     if (typeof getProductsRaw !== "function") return;
 
@@ -83,7 +77,6 @@ export default function Catalog() {
       .catch(() => setBaseProducts([]));
   }, [line, getProductsRaw]);
 
-  // 2) Opciones SIEMPRE visibles, calculadas desde baseProducts (solo línea)
   const facets = useMemo(() => {
     const categories = [];
     const subcategories = [];
@@ -111,7 +104,6 @@ export default function Catalog() {
     };
   }, [baseProducts]);
 
-  // 3) Params de resultados (backend)
   const requestParams = useMemo(() => {
     const params = { page: 1, limit: 200, sort: "-createdAt" };
 
@@ -139,7 +131,6 @@ export default function Catalog() {
     return params;
   }, [line, query, selectedCategories, selectedSubcategories, selectedSize, selectedColor]);
 
-  // 4) Cargar resultados desde App.jsx
   useEffect(() => {
     if (typeof onProductsReload !== "function") return;
     onProductsReload(requestParams).catch(() => { });

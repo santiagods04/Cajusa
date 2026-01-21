@@ -1,4 +1,3 @@
-// src/components/Popup/Popup.jsx
 import { useEffect, useContext } from 'react';
 import AppContext from '../../context/AppContext';
 import ProductForm from '../Popup/ProductForm/ProductForm';
