@@ -8,6 +8,7 @@ const {
   ALLOW_SEED,
   ADMIN_EMAIL,
   ADMIN_PASSWORD,
+  ADMIN_PROMOTE,
 } = process.env;
 
 const exitWith = async (code, msg) => {
@@ -23,7 +24,12 @@ const exitWith = async (code, msg) => {
 (async () => {
   try {
     if (ALLOW_SEED !== 'true') {
-      console.log('⛔ Seed bloqueado. Para correrlo: ALLOW_SEED=true');
+      console.log('⛔ Seed bloqueado. Para correrlo: cumpla los requisitos');
+      return exitWith(0);
+    }
+
+    if (ALLOW_PROMOTE !== 'true') {
+      console.log('⛔ Promoción bloqueada. Para correrlo: cumpla los requisitos');
       return exitWith(0);
     }
 
@@ -53,6 +59,9 @@ const exitWith = async (code, msg) => {
     const hash = await bcrypt.hash(ADMIN_PASSWORD, 10);
 
     const admin = await User.create({
+      name: "admin",
+      nickname: "admin01",
+      phone: "+57313895067",
       email: ADMIN_EMAIL,
       password: hash,
       role: 'admin',

@@ -2,6 +2,7 @@ import { useEffect, useContext } from 'react';
 import AppContext from '../../context/AppContext';
 import ProductForm from '../Popup/ProductForm/ProductForm';
 import InfoToolTip from "./InfoToolTip/InfoToolTip";
+import ImageProduct from './ImageProduct/ImageProduct';
 
 function Popup() {
 
@@ -39,6 +40,7 @@ function Popup() {
 
     const isProductForm = activePopup === "product-form";
     const isInfoToolTip = activePopup === "info-tooltip";
+    const isImageProduct = activePopup === "image-product";
 
     const mode = popupProps?.mode || "create";
     const product = popupProps?.product || null;
@@ -49,11 +51,18 @@ function Popup() {
     const infoTitle = popupProps?.title || "En construcción";
     const infoMessage = popupProps?.message || "En construcción, visítame en una próxima ocasión";
 
-    const title = isInfoToolTip ? infoTitle : formTitle;
-    const containerTypeClass = isInfoToolTip
-        ? "popup__container_type_tooltip"
-        : "popup__container_type_form"
-        ;
+    const title =
+        isInfoToolTip ? infoTitle :
+            isProductForm ? formTitle :
+                null;
+    const containerTypeClass =
+        isInfoToolTip
+            ? "popup__container_type_tooltip"
+            : isProductForm
+                ? "popup__container_type_form"
+                : isImageProduct
+                    ? "popup__container_type_image"
+                    : "";
 
     return (
         <div className={`popup popup_opened`} onMouseDown={handleOverlayClick}>
@@ -85,6 +94,13 @@ function Popup() {
                             message={infoMessage}
                             onOk={popupProps?.onOk}
                             onClose={closePopup}
+                        />
+                    )}
+                    {isImageProduct && (
+                        <ImageProduct
+                            images={popupProps?.images}
+                            startIndex={popupProps?.startIndex || 0}
+                            alt={popupProps?.alt || "Imagen del producto"}
                         />
                     )}
                 </div>

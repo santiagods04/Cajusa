@@ -10,7 +10,6 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
-  /* estado cerrado */
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -155,6 +154,53 @@
 .popup__content {
   margin-top: 6px;
 }
+
+/* =========================
+   Image popup
+   ========================= */
+
+.popup__imageFrame {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.popup__image {
+  width: 100%;
+  height: auto;
+  max-height: calc(100vh - 140px);
+  object-fit: contain;
+  border-radius: 18px;
+}
+
+.popup__imageNav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
+
+.popup__imageNav--left {
+  left: 10px;
+}
+
+.popup__imageNav--right {
+  right: 10px;
+}
+
+.popup__counter {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
 
 /* =========================
    Form styles (usados por ProductForm)

@@ -146,6 +146,10 @@ function App() {
       });
   }
 
+  function openImagePopup({ images, startIndex = 0, alt = "" } = {}) {
+    setPopupProps({ images, startIndex, alt });
+    setActivePopup("image-product");
+  }
   function openInfoToolTipPopup({
     title = "En construcción",
     message = "En construcción, visítame en una próxima ocasión",
@@ -240,6 +244,7 @@ function App() {
     openCreateProductPopup,
     openEditProductPopup,
     openInfoToolTipPopup,
+    openImagePopup,
     closePopup,
     activeOverlay,
     overlayProps,

@@ -5,7 +5,7 @@ import { openWhatsApp } from "../../utils/whatsapp";
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const { getProductByIdRaw, getProductsRaw } = useContext(AppContext);
+  const { getProductByIdRaw, getProductsRaw, openImagePopup } = useContext(AppContext);
 
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,7 +16,6 @@ export default function ProductDetail() {
 
 
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isZoomOpen, setIsZoomOpen] = useState(false);
 
   const [related, setRelated] = useState([]);
 
@@ -35,12 +34,12 @@ export default function ProductDetail() {
           id: data._id ?? data.id,
           variants: Array.isArray(data.variants)
             ? data.variants.map((v) => ({
-                ...v,
-                available:
-                  typeof v.available === "boolean"
-                    ? v.available
-                    : Number(v.quantity || 0) > 0,
-              }))
+              ...v,
+              available:
+                typeof v.available === "boolean"
+                  ? v.available
+                  : Number(v.quantity || 0) > 0,
+            }))
             : [],
         };
 
@@ -91,18 +90,28 @@ export default function ProductDetail() {
     setActiveIndex((i) => (i + 1) % images.length);
   };
 
-  useEffect(() => {
-    if (!isZoomOpen) return;
+  // useEffect(() => {
+  //   if (!isZoomOpen) return;
 
-    const onKeyDown = (e) => {
-      if (e.key === "Escape") setIsZoomOpen(false);
-      if (e.key === "ArrowLeft") goPrev();
-      if (e.key === "ArrowRight") goNext();
-    };
+  //   const onKeyDown = (e) => {
+  //     if (e.key === "Escape") setIsZoomOpen(false);
+  //     if (e.key === "ArrowLeft") goPrev();
+  //     if (e.key === "ArrowRight") goNext();
+  //   };
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isZoomOpen, images.length]);
+  //   window.addEventListener("keydown", onKeyDown);
+  //   return () => window.removeEventListener("keydown", onKeyDown);
+  // }, [isZoomOpen, images.length]);
+  const handleOpenZoom = () => {
+    if (!images?.length || !openImagePopup) return;
+
+    openImagePopup({
+      title: product?.name || "Imagen del producto",
+      images,
+      startIndex: activeIndex,
+      alt: `${product?.name || "Producto"} en grande`,
+    });
+  };
 
   const sizes = useMemo(() => {
     if (!product?.variants) return [];
@@ -124,13 +133,13 @@ export default function ProductDetail() {
     String(product?.line || "").toLowerCase() === "antifluido"
       ? "Antifluido"
       : "Lino";
-  
+
   const priceLabel =
-  typeof product?.price === "number"
-    ? `$${product.price.toLocaleString("es-CO")}`
-    : product?.price
-      ? `$${Number(product.price).toLocaleString("es-CO")}`
-      : "--";
+    typeof product?.price === "number"
+      ? `$${product.price.toLocaleString("es-CO")}`
+      : product?.price
+        ? `$${Number(product.price).toLocaleString("es-CO")}`
+        : "--";
 
   const SPARK = "\u2728";
   const OK = "\u2705";
@@ -199,9 +208,8 @@ export default function ProductDetail() {
                 <button
                   key={`${src}-${idx}`}
                   type="button"
-                  className={`product__thumbBtn ${
-                    idx === activeIndex ? "product__thumbBtn--active" : ""
-                  }`}
+                  className={`product__thumbBtn ${idx === activeIndex ? "product__thumbBtn--active" : ""
+                    }`}
                   onClick={() => setActiveIndex(idx)}
                   aria-label={`Ver imagen ${idx + 1}`}
                 >
@@ -222,7 +230,7 @@ export default function ProductDetail() {
             <button
               type="button"
               className="product__mainBtn"
-              onClick={() => images.length && setIsZoomOpen(true)}
+              onClick={handleOpenZoom}
               aria-label="Abrir imagen en grande"
               disabled={!images.length}
             >
@@ -390,55 +398,6 @@ export default function ProductDetail() {
           </p>
         )}
       </section>
-
-      {/* Modal zoom */}
-      {isZoomOpen && (
-        <div
-          className="product__modalOverlay"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setIsZoomOpen(false)}
-        >
-          <div className="product__modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="product__modalClose"
-              onClick={() => setIsZoomOpen(false)}
-              aria-label="Cerrar"
-            >
-              ✕
-            </button>
-
-            <button
-              type="button"
-              className="product__modalNav product__modalNav--left"
-              onClick={goPrev}
-              aria-label="Anterior"
-              disabled={!hasManyImages}
-            >
-              ‹
-            </button>
-
-            <div className="product__modalFrame">
-              <img
-                className="product__modalImg"
-                src={activeImg}
-                alt={`${product.name} en grande`}
-              />
-            </div>
-
-            <button
-              type="button"
-              className="product__modalNav product__modalNav--right"
-              onClick={goNext}
-              aria-label="Siguiente"
-              disabled={!hasManyImages}
-            >
-              ›
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
