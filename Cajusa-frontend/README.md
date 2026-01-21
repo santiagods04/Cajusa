@@ -1,16 +1,36 @@
-# React + Vite
+# Cajusa Frontend (Web)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend de **Cajusa**: aplicación web para navegar el catálogo, filtrar productos y gestionar acceso (login/registro). Construida con **React + Vite** y conectada a la API desplegada.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tecnologías
+- React
+- Vite
+- JavaScript
+- CSS (estilos del proyecto)
+- Fetch API para consumo del backend
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Funcionalidades
+- **Home** con sección de destacados.
+- **Catálogo** con búsqueda y filtros (línea/categoría/subcategoría/talla/color).
+- **Autenticación**:
+  - Registro e inicio de sesión contra la API.
+  - Persistencia de sesión (token en navegador, según implementación del proyecto).
+- **Panel/Admin (según rol)** para gestionar productos (cuando aplica).
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Requisitos
+- Node.js (recomendado 18+)
+- npm
+
+---
+
+## Variables de entorno
+Crea un archivo `.env` en la raíz de `Cajusa-frontend/`:
+
+```env
+VITE_API_URL=https://api.tu-dominio.com

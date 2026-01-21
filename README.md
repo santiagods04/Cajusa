@@ -1,34 +1,27 @@
-# Cajusa
+# Cajusa (Monorepo) — Full Stack E-commerce
 
-Monorepo del proyecto **Cajusa** (Frontend + Backend) administrado con **npm workspaces**.
+Cajusa es una aplicación web full stack para catálogo de productos y gestión de usuarios/roles (cliente y administrador).  
+Repositorio monorepo con **frontend** (React/Vite) y **backend** (Node/Express/MongoDB).
 
-## Requisitos
-- **Node.js ≥ 18** y **npm ≥ 10**
-- **MongoDB** local o Atlas
-- Archivos de entorno por app (`.env`) basados en los `*.env.example`
+## 🌐 Demo (Producción)
+- Sitio: https://cajusa.com.co  
+- API: https://api.cajusa.com.co
 
-## Estructura
-Cajusa/
+## 🧱 Estructura del repositorio
+
+/
 ├─ Cajusa-frontend/ # React + Vite
-└─ Cajusa-backend/ # Node.js + Express + MongoDB
+└─ Cajusa-backend/ # Node + Express + MongoDB
 
-## Instalación y ejecución
+## 📌 Tecnologías
+- **Frontend:** React, Vite, JavaScript, CSS
+- **Backend:** Node.js, Express, MongoDB (Mongoose)
+- **Auth:** JWT
+- **Deploy:** NGINX + PM2 + HTTPS (Certbot/Let’s Encrypt)
 
-Desde la raíz del monorepo:
-
-# Instalar todas las dependencias (workspaces)
+## 🚀 Cómo correr en local (resumen)
+### Backend
+```bash
+cd Cajusa-backend
 npm install
-
-# Levantar ambos servicios (backend + frontend)
 npm run dev
-
-## Scripts disponibles
-
-En la raíz:
-
-npm run dev         # back + front (concurrently)
-npm run dev:back    # solo backend
-npm run dev:front   # solo frontend
-npm run build       # build en todos los paquetes
-npm run build:back  # build backend (placeholder)
-npm run build:front # build frontend
