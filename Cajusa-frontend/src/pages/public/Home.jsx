@@ -296,24 +296,24 @@ export default function Home() {
       </section>
 
       {/* DESTACADOS */}
-      <section className="home__featured">
-        <div className="home__featured-head">
-          <h2 className="home__featured-title">Destacados</h2>
-          <span className="home__featured-count">
+      <section className="mt-[22px]">
+        <div className="mb-2.5 flex items-baseline justify-between gap-2.5">
+          <h2 className="m-0 text-xl">Destacados</h2>
+          <span className="text-[13px] text-[var(--muted)]">
             {featured.length ? `${featured.length} productos` : ""}
           </span>
         </div>
 
         {productsError ? (
-          <div className="state">Error: {productsError}</div>
+          <div className="p-4">Error: {productsError}</div>
         ) : productsLoading && featured.length === 0 ? (
-          <div className="state">Cargando productos…</div>
+          <div className="p-4">Cargando productos…</div>
         ) : featured.length === 0 ? (
-          <div className="state">Aún no hay productos.</div>
+          <div className="p-4">Aún no hay productos.</div>
         ) : (
-          <div className="home__carousel" ref={carouselRef}>
+          <div className="relative" ref={carouselRef}>
             <button
-              className="home__arrow home__arrow--left"
+              className="absolute left-1.5 top-[42%] z-[5] h-10 w-10 -translate-y-1/2 cursor-pointer rounded-full border border-[rgba(42,36,30,0.14)] bg-white/85 text-[26px] leading-none shadow-[0_12px_24px_rgba(42,36,30,0.16)] hover:bg-white"
               type="button"
               aria-label="Ver anteriores"
               onClick={() => scrollRail(-1)}
@@ -321,7 +321,7 @@ export default function Home() {
               ‹
             </button>
 
-            <div className="home__rail" ref={railRef}>
+            <div className="home__rail flex gap-3.5 overflow-hidden overflow-y-hidden px-11 pb-2.5 pt-1.5 scroll-smooth [scroll-snap-type:none] [scrollbar-width:none] [-ms-overflow-style:none] [overscroll-behavior-x:contain] [&::-webkit-scrollbar]:hidden" ref={railRef}>
               {loopedFeatured.map((p, idx) => {
                 const img = Array.isArray(p.images) ? p.images[0] : null;
                 const price = formatCOP(p.price);
@@ -330,34 +330,34 @@ export default function Home() {
                 return (
                   <Link
                     key={`${p._id || p.id}-${idx}`}
-                    className="home__mini-card link"
+                    className="home__mini-card link flex-[0_0_240px] snap-start overflow-hidden rounded-[18px] border border-[rgba(42,36,30,0.12)] bg-white/[0.65] shadow-[var(--shadow)] [transition:transform_0.08s_ease,box-shadow_0.2s_ease] hover:-translate-y-px hover:shadow-[0_18px_44px_rgba(42,36,30,0.12)]"
                     to={`/product/${p._id || p.id}`}
                   >
-                    <div className={`home__mini-media ${img ? "" : "home__mini-media--placeholder"}`}>
+                    <div className={`relative aspect-[4/5] w-full overflow-hidden ${img ? "" : "home__mini-media--placeholder"}`}>
                       {img ? (
                         <img
-                          className="home__mini-img"
+                          className="block h-full w-full object-cover object-[center_18%]"
                           src={img}
                           alt={p.name || "Producto"}
                           loading="lazy"
                         />
                       ) : (
-                        <div className="home__mini-placeholder">
+                        <div className="grid h-full place-items-center [font-family:var(--font-title)] text-[48px] text-[rgba(42,36,30,0.40)]">
                           {(p.name || "C").slice(0, 1).toUpperCase()}
                         </div>
                       )}
 
                       {badgeText ? (
-                        <span className={`home__mini-badge home__mini-badge--${p.line}`}>
-                          <span className="home__mini-dot" />
+                        <span className={`home__mini-badge--${p.line} absolute left-3 top-3 z-[3] inline-flex items-center gap-2 rounded-full border border-[rgba(42,36,30,0.16)] bg-white px-2.5 py-1.5 text-[12px] font-extrabold text-[rgba(42,36,30,0.95)] shadow-[0_10px_22px_rgba(42,36,30,0.18)]`}>
+                          <span className="home__mini-dot h-2 w-2 rounded-full bg-[var(--accent)] outline outline-2 outline-[rgba(42,36,30,0.10)]" />
                           {badgeText}
                         </span>
                       ) : null}
                     </div>
 
-                    <div className="home__mini-body">
-                      <div className="home__mini-title">{p.name}</div>
-                      <div className="home__mini-price">{price || "Precio por WhatsApp"}</div>
+                    <div className="px-3.5 pb-3.5 pt-3">
+                      <div className="overflow-hidden text-[14px] font-extrabold text-[var(--text)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">{p.name}</div>
+                      <div className="mt-2 font-black text-[var(--text)]">{price || "Precio por WhatsApp"}</div>
                     </div>
                   </Link>
                 );
@@ -365,7 +365,7 @@ export default function Home() {
             </div>
 
             <button
-              className="home__arrow home__arrow--right"
+              className="absolute right-1.5 top-[42%] z-[5] h-10 w-10 -translate-y-1/2 cursor-pointer rounded-full border border-[rgba(42,36,30,0.14)] bg-white/85 text-[26px] leading-none shadow-[0_12px_24px_rgba(42,36,30,0.16)] hover:bg-white"
               type="button"
               aria-label="Ver siguientes"
               onClick={() => scrollRail(1)}
