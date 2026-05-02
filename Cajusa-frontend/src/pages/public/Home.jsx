@@ -240,49 +240,49 @@ export default function Home() {
   return (
     <div className="container">
       {/* HERO */}
-      <section className="home__hero">
+      <section className="relative grid grid-cols-[1.15fr_0.85fr] items-center gap-7 overflow-hidden rounded-[24px] border border-[rgba(42,36,30,0.12)] bg-white/[0.62] p-7 shadow-[var(--shadow)] max-[980px]:grid-cols-1 max-[980px]:p-[18px]">
         {heroProduct?.images?.[0] ? (
           <div
-            className="home__hero-bg"
+            className="pointer-events-none absolute -inset-[60px] scale-[1.08] bg-cover bg-center opacity-[0.22] blur-[26px] saturate-[1.1]"
             style={{ backgroundImage: `url(${heroProduct.images[0]})` }}
             aria-hidden="true"
           />
         ) : null}
 
-        <div className="home__hero-left">
-          <span className="home__eyebrow">Confección profesional y artesanal</span>
+        <div className="relative z-[1]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(42,36,30,0.12)] bg-white/75 px-2.5 py-1.5 text-[12px] font-extrabold tracking-[0.4px] text-[rgba(42,36,30,0.85)]">Confección profesional y artesanal</span>
 
-          <h1 className="home__title">Cajusa</h1>
+          <h1 className="m-0 mt-2.5 [font-family:var(--font-title)] text-[46px] leading-[1.02] tracking-[0.6px] text-[var(--text)] max-[980px]:text-[38px]">Cajusa</h1>
 
-          <p className="home__subtitle">
+          <p className="m-0 mt-2.5 max-w-[60ch] text-[var(--muted)]">
             Uniformes antifluido (Lafayette) y prendas en lino artesanal. Compra por WhatsApp.
           </p>
 
-          <ul className="home__bullets">
-            <li className="home__bullet">Guía de talla</li>
-            <li className="home__bullet">Calidad Textil</li>
-            <li className="home__bullet">Atención por WhatsApp</li>
+          <ul className="m-0 mt-3.5 grid max-w-[60ch] list-none gap-2 p-0">
+            <li className="flex items-center gap-2.5 font-semibold text-[rgba(42,36,30,0.80)] before:block before:h-2.5 before:w-2.5 before:shrink-0 before:rounded-full before:bg-[var(--accent)] before:shadow-[0_0_0_3px_rgba(255,255,255,0.65)] before:content-['']">Guía de talla</li>
+            <li className="flex items-center gap-2.5 font-semibold text-[rgba(42,36,30,0.80)] before:block before:h-2.5 before:w-2.5 before:shrink-0 before:rounded-full before:bg-[var(--accent)] before:shadow-[0_0_0_3px_rgba(255,255,255,0.65)] before:content-['']">Calidad Textil</li>
+            <li className="flex items-center gap-2.5 font-semibold text-[rgba(42,36,30,0.80)] before:block before:h-2.5 before:w-2.5 before:shrink-0 before:rounded-full before:bg-[var(--accent)] before:shadow-[0_0_0_3px_rgba(255,255,255,0.65)] before:content-['']">Atención por WhatsApp</li>
           </ul>
 
-          <div className="home__actions">
+          <div className="mt-4 flex flex-wrap gap-3">
             <Link to="/catalog" className="link">
               <button className="btn btn-primary" type="button">Ver Catálogo</button>
             </Link>
           </div>
         </div>
 
-        <div className="home__hero-right">
-          <div className="home__hero-gallery">
+        <div className="relative z-[1] grid justify-items-end max-[980px]:w-[min(520px,100%)] max-[980px]:justify-self-start">
+          <div className="group aspect-[4/5] w-[min(420px,100%)] overflow-hidden rounded-[18px] border border-[rgba(42,36,30,0.12)] bg-white/[0.65] shadow-[var(--shadow)]">
             <div
-              className="home__hero-track"
+              className="flex h-full flex-nowrap will-change-transform [animation:heroMarquee_var(--heroDuration,18s)_linear_infinite] group-hover:[animation-play-state:paused] motion-reduce:animate-none"
               ref={heroTrackRef}
               style={{ "--heroDuration": heroDuration }}
             >
               {heroLoop.map((item, idx) => (
-                <div className="home__hero-slide" key={`${item.id}-${idx}`}>
-                  <div className="home__hero-frame">
+                <div className="box-border h-full flex-[0_0_100%] p-2.5" key={`${item.id}-${idx}`}>
+                  <div className="h-full w-full overflow-hidden rounded-[14px] bg-white/[0.35]">
                     <img
-                      className="home__hero-img"
+                      className="block h-full w-full object-cover object-[center_18%]"
                       src={item.img}
                       alt={item.name || "Prenda Cajusa"}
                       loading="lazy"
@@ -296,24 +296,24 @@ export default function Home() {
       </section>
 
       {/* DESTACADOS */}
-      <section className="home__featured">
-        <div className="home__featured-head">
-          <h2 className="home__featured-title">Destacados</h2>
-          <span className="home__featured-count">
+      <section className="mt-[22px]">
+        <div className="mb-2.5 flex items-baseline justify-between gap-2.5">
+          <h2 className="m-0 text-xl">Destacados</h2>
+          <span className="text-[13px] text-[var(--muted)]">
             {featured.length ? `${featured.length} productos` : ""}
           </span>
         </div>
 
         {productsError ? (
-          <div className="state">Error: {productsError}</div>
+          <div className="p-4">Error: {productsError}</div>
         ) : productsLoading && featured.length === 0 ? (
-          <div className="state">Cargando productos…</div>
+          <div className="p-4">Cargando productos…</div>
         ) : featured.length === 0 ? (
-          <div className="state">Aún no hay productos.</div>
+          <div className="p-4">Aún no hay productos.</div>
         ) : (
-          <div className="home__carousel" ref={carouselRef}>
+          <div className="relative" ref={carouselRef}>
             <button
-              className="home__arrow home__arrow--left"
+              className="absolute left-1.5 top-[42%] z-[5] h-10 w-10 -translate-y-1/2 cursor-pointer rounded-full border border-[rgba(42,36,30,0.14)] bg-white/85 text-[26px] leading-none shadow-[0_12px_24px_rgba(42,36,30,0.16)] hover:bg-white"
               type="button"
               aria-label="Ver anteriores"
               onClick={() => scrollRail(-1)}
@@ -321,7 +321,7 @@ export default function Home() {
               ‹
             </button>
 
-            <div className="home__rail" ref={railRef}>
+            <div className="home__rail flex gap-3.5 overflow-hidden overflow-y-hidden px-11 pb-2.5 pt-1.5 scroll-smooth [scroll-snap-type:none] [scrollbar-width:none] [-ms-overflow-style:none] [overscroll-behavior-x:contain] [&::-webkit-scrollbar]:hidden" ref={railRef}>
               {loopedFeatured.map((p, idx) => {
                 const img = Array.isArray(p.images) ? p.images[0] : null;
                 const price = formatCOP(p.price);
@@ -330,34 +330,34 @@ export default function Home() {
                 return (
                   <Link
                     key={`${p._id || p.id}-${idx}`}
-                    className="home__mini-card link"
+                    className="home__mini-card link flex-[0_0_240px] snap-start overflow-hidden rounded-[18px] border border-[rgba(42,36,30,0.12)] bg-white/[0.65] shadow-[var(--shadow)] [transition:transform_0.08s_ease,box-shadow_0.2s_ease] hover:-translate-y-px hover:shadow-[0_18px_44px_rgba(42,36,30,0.12)]"
                     to={`/product/${p._id || p.id}`}
                   >
-                    <div className={`home__mini-media ${img ? "" : "home__mini-media--placeholder"}`}>
+                    <div className={`relative aspect-[4/5] w-full overflow-hidden ${img ? "" : "home__mini-media--placeholder"}`}>
                       {img ? (
                         <img
-                          className="home__mini-img"
+                          className="block h-full w-full object-cover object-[center_18%]"
                           src={img}
                           alt={p.name || "Producto"}
                           loading="lazy"
                         />
                       ) : (
-                        <div className="home__mini-placeholder">
+                        <div className="grid h-full place-items-center [font-family:var(--font-title)] text-[48px] text-[rgba(42,36,30,0.40)]">
                           {(p.name || "C").slice(0, 1).toUpperCase()}
                         </div>
                       )}
 
                       {badgeText ? (
-                        <span className={`home__mini-badge home__mini-badge--${p.line}`}>
-                          <span className="home__mini-dot" />
+                        <span className={`home__mini-badge--${p.line} absolute left-3 top-3 z-[3] inline-flex items-center gap-2 rounded-full border border-[rgba(42,36,30,0.16)] bg-white px-2.5 py-1.5 text-[12px] font-extrabold text-[rgba(42,36,30,0.95)] shadow-[0_10px_22px_rgba(42,36,30,0.18)]`}>
+                          <span className="home__mini-dot h-2 w-2 rounded-full bg-[var(--accent)] outline outline-2 outline-[rgba(42,36,30,0.10)]" />
                           {badgeText}
                         </span>
                       ) : null}
                     </div>
 
-                    <div className="home__mini-body">
-                      <div className="home__mini-title">{p.name}</div>
-                      <div className="home__mini-price">{price || "Precio por WhatsApp"}</div>
+                    <div className="px-3.5 pb-3.5 pt-3">
+                      <div className="overflow-hidden text-[14px] font-extrabold text-[var(--text)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">{p.name}</div>
+                      <div className="mt-2 font-black text-[var(--text)]">{price || "Precio por WhatsApp"}</div>
                     </div>
                   </Link>
                 );
@@ -365,7 +365,7 @@ export default function Home() {
             </div>
 
             <button
-              className="home__arrow home__arrow--right"
+              className="absolute right-1.5 top-[42%] z-[5] h-10 w-10 -translate-y-1/2 cursor-pointer rounded-full border border-[rgba(42,36,30,0.14)] bg-white/85 text-[26px] leading-none shadow-[0_12px_24px_rgba(42,36,30,0.16)] hover:bg-white"
               type="button"
               aria-label="Ver siguientes"
               onClick={() => scrollRail(1)}
