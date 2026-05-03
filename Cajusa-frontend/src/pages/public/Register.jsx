@@ -83,21 +83,21 @@ export default function Register() {
   }
 
   return (
-    <main className="auth">
-      <div className="container auth__inner">
-        <div className="auth__card">
-          <h1 className="auth__title">Registro</h1>
-          <p className="auth__subtitle">
+    <main className="py-[26px] pb-[46px]">
+      <div className="container grid place-items-center">
+        <div className="w-[min(520px,100%)] rounded-[18px] border border-[rgba(42,36,30,0.14)] bg-white/[0.35] p-[22px] shadow-[var(--shadow)]">
+          <h1 className="m-0 text-[22px] tracking-[0.01em]">Registro</h1>
+          <p className="mb-4 mt-2 leading-normal opacity-80">
             Crea tu cuenta para comprar más rápido y guardar tus favoritos.
           </p>
 
-          <form className="auth__form" onSubmit={handleSubmit}>
-            <label className="auth__field">
-              <span className="auth__label">Nombre completo</span>
+          <form className="grid gap-3" onSubmit={handleSubmit}>
+            <label className="grid gap-1.5">
+              <span className="text-[13px] opacity-85">Nombre completo</span>
 
-              <div className="auth__row">
+              <div className="flex gap-2.5 max-[480px]:flex-col">
                 <input
-                  className="auth__input"
+                  className="min-w-0 flex-1 rounded-xl border border-[rgba(42,36,30,0.14)] bg-white/25 px-3 py-2.5 outline-none focus:shadow-[0_0_0_3px_rgba(42,36,30,0.12)]"
                   type="text"
                   name="firstName"
                   autoComplete="given-name"
@@ -109,7 +109,7 @@ export default function Register() {
                 />
 
                 <input
-                  className="auth__input"
+                  className="min-w-0 flex-1 rounded-xl border border-[rgba(42,36,30,0.14)] bg-white/25 px-3 py-2.5 outline-none focus:shadow-[0_0_0_3px_rgba(42,36,30,0.12)]"
                   type="text"
                   name="lastName"
                   autoComplete="family-name"
@@ -122,10 +122,10 @@ export default function Register() {
               </div>
             </label>
 
-            <label className="auth__field">
-              <span className="auth__label">Nombre de usuario</span>
+            <label className="grid gap-1.5">
+              <span className="text-[13px] opacity-85">Nombre de usuario</span>
               <input
-                className="auth__input"
+                className="rounded-xl border border-[rgba(42,36,30,0.14)] bg-white/25 px-3 py-2.5 outline-none focus:shadow-[0_0_0_3px_rgba(42,36,30,0.12)]"
                 type="text"
                 name="nickname"
                 autoComplete="nickname"
@@ -137,10 +137,10 @@ export default function Register() {
               />
             </label>
 
-            <label className="auth__field">
-              <span className="auth__label">Correo</span>
+            <label className="grid gap-1.5">
+              <span className="text-[13px] opacity-85">Correo</span>
               <input
-                className="auth__input"
+                className="rounded-xl border border-[rgba(42,36,30,0.14)] bg-white/25 px-3 py-2.5 outline-none focus:shadow-[0_0_0_3px_rgba(42,36,30,0.12)]"
                 type="email"
                 name="email"
                 autoComplete="email"
@@ -151,12 +151,12 @@ export default function Register() {
               />
             </label>
 
-            <label className="auth__field">
-              <span className="auth__label">Teléfono</span>
+            <label className="grid gap-1.5">
+              <span className="text-[13px] opacity-85">Teléfono</span>
 
-              <div className="auth__row">
+              <div className="flex gap-2.5 max-[480px]:flex-col">
                 <input
-                  className="auth__input auth__input--code"
+                  className="w-full max-w-[90px] rounded-xl border border-[rgba(42,36,30,0.14)] bg-white/25 px-3 py-2.5 outline-none focus:shadow-[0_0_0_3px_rgba(42,36,30,0.12)] max-[480px]:max-w-none"
                   type="text"
                   name="countryCode"
                   placeholder="+57"
@@ -166,7 +166,7 @@ export default function Register() {
                 />
 
                 <input
-                  className="auth__input"
+                  className="min-w-0 flex-1 rounded-xl border border-[rgba(42,36,30,0.14)] bg-white/25 px-3 py-2.5 outline-none focus:shadow-[0_0_0_3px_rgba(42,36,30,0.12)]"
                   type="tel"
                   name="phoneNumber"
                   placeholder="3001234567"
@@ -177,10 +177,10 @@ export default function Register() {
               </div>
             </label>
 
-            <label className="auth__field">
-              <span className="auth__label">Contraseña</span>
+            <label className="grid gap-1.5">
+              <span className="text-[13px] opacity-85">Contraseña</span>
               <input
-                className="auth__input"
+                className="rounded-xl border border-[rgba(42,36,30,0.14)] bg-white/25 px-3 py-2.5 outline-none focus:shadow-[0_0_0_3px_rgba(42,36,30,0.12)]"
                 type="password"
                 name="password"
                 autoComplete="new-password"
@@ -192,10 +192,10 @@ export default function Register() {
               />
             </label>
 
-            <label className="auth__field">
-              <span className="auth__label">Confirmar contraseña</span>
+            <label className="grid gap-1.5">
+              <span className="text-[13px] opacity-85">Confirmar contraseña</span>
               <input
-                className="auth__input"
+                className="rounded-xl border border-[rgba(42,36,30,0.14)] bg-white/25 px-3 py-2.5 outline-none focus:shadow-[0_0_0_3px_rgba(42,36,30,0.12)]"
                 type="password"
                 name="confirmPassword"
                 autoComplete="new-password"
@@ -206,16 +206,16 @@ export default function Register() {
                 required
               />
             </label>
-            {error && <p className="auth__error">{error}</p>}
+            {error && <p className="m-0 mt-2.5 text-sm text-[#d33]">{error}</p>}
 
-            <button className="btn btn--active auth__btn" type="submit" disabled={!isValid || isSubmitting}>
+            <button className="btn btn--active mt-1.5 w-full" type="submit" disabled={!isValid || isSubmitting}>
               {isSubmitting ? "Creando..." : "Crear cuenta"}
             </button>
           </form>
 
-          <p className="auth__hint">
+          <p className="m-0 mt-3.5 opacity-85">
             ¿Ya tienes cuenta?{" "}
-            <Link className="auth__link" to="/login">
+            <Link className="text-inherit underline underline-offset-4" to="/login">
               Inicia sesión
             </Link>
           </p>

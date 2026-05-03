@@ -195,26 +195,26 @@ export default function ProductDetail() {
 
   return (
     <div className="container">
-      <Link className="link product__back" to="/catalog">
+      <Link className="link mb-2.5 inline-block" to="/catalog">
         ← Volver al catálogo
       </Link>
 
-      <div className="product__top">
+      <div className="grid grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] items-start gap-7 max-[900px]:grid-cols-1">
         {/* IZQUIERDA: Galería */}
-        <section className="product__media">
-          <div className="product__thumbs" aria-label="Miniaturas del producto">
+        <section className="grid grid-cols-[74px_minmax(0,1fr)] gap-3.5 max-[900px]:grid-cols-[64px_1fr]">
+          <div className="flex max-h-[520px] flex-col gap-2.5 overflow-auto pr-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Miniaturas del producto">
             {images.length ? (
               images.map((src, idx) => (
                 <button
                   key={`${src}-${idx}`}
                   type="button"
-                  className={`product__thumbBtn ${idx === activeIndex ? "product__thumbBtn--active" : ""
+                  className={`cursor-pointer rounded-xl border border-[rgba(42,36,30,0.14)] bg-white/[0.35] p-1.5 [transition:transform_0.12s_ease] hover:-translate-y-px ${idx === activeIndex ? "outline outline-2 outline-[rgba(42,36,30,0.35)]" : ""
                     }`}
                   onClick={() => setActiveIndex(idx)}
                   aria-label={`Ver imagen ${idx + 1}`}
                 >
                   <img
-                    className="product__thumbImg"
+                    className="block aspect-square w-full rounded-[10px] bg-white/[0.35] object-contain object-center"
                     src={src}
                     alt={`${product.name} miniatura ${idx + 1}`}
                     loading="lazy"
@@ -222,26 +222,26 @@ export default function ProductDetail() {
                 </button>
               ))
             ) : (
-              <div className="product__noThumbs">Sin imágenes</div>
+              <div className="p-2 text-sm opacity-70">Sin imágenes</div>
             )}
           </div>
 
-          <div className="product__main product__mainFrame">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-[18px] border border-[rgba(42,36,30,0.12)] bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.22),rgba(42,36,30,0.08))] shadow-[var(--shadow)]">
             <button
               type="button"
-              className="product__mainBtn"
+              className="h-full w-full cursor-zoom-in border-0 bg-transparent p-0 disabled:cursor-not-allowed"
               onClick={handleOpenZoom}
               aria-label="Abrir imagen en grande"
               disabled={!images.length}
             >
               {images.length ? (
                 <img
-                  className="product__mainImg"
+                  className="block h-full w-full bg-transparent object-contain object-center"
                   src={activeImg}
                   alt={product.name}
                 />
               ) : (
-                <div className="product__noMain">Sin imágenes</div>
+                <div className="grid h-full w-full place-items-center text-sm opacity-70">Sin imágenes</div>
               )}
             </button>
 
@@ -249,7 +249,7 @@ export default function ProductDetail() {
               <>
                 <button
                   type="button"
-                  className="product__navBtn product__navBtn--left"
+                  className="absolute left-2.5 top-1/2 grid h-10 w-10 -translate-y-1/2 cursor-pointer place-items-center rounded-full border border-[rgba(42,36,30,0.14)] bg-white/80 text-[26px] leading-none"
                   onClick={(e) => {
                     e.stopPropagation();
                     goPrev();
@@ -261,7 +261,7 @@ export default function ProductDetail() {
 
                 <button
                   type="button"
-                  className="product__navBtn product__navBtn--right"
+                  className="absolute right-2.5 top-1/2 grid h-10 w-10 -translate-y-1/2 cursor-pointer place-items-center rounded-full border border-[rgba(42,36,30,0.14)] bg-white/80 text-[26px] leading-none"
                   onClick={(e) => {
                     e.stopPropagation();
                     goNext();
@@ -272,7 +272,7 @@ export default function ProductDetail() {
                 </button>
 
                 <div
-                  className="product__counter"
+                  className="absolute bottom-2.5 left-2.5 rounded-full border border-[rgba(42,36,30,0.14)] bg-white/80 px-2.5 py-1.5 text-xs"
                   aria-label="Contador de imágenes"
                 >
                   {activeIndex + 1}/{images.length}
@@ -283,20 +283,20 @@ export default function ProductDetail() {
         </section>
 
         {/* DERECHA: Compra */}
-        <section className="product__info">
-          <h1 className="page__title">{product.name}</h1>
+        <section>
+          <h1 className="page__title mt-0">{product.name}</h1>
 
           {product.price != null && (
-            <p className="product__price">
+            <p className="mb-1.5 mt-2.5 text-xl font-bold">
               ${Number(product.price).toLocaleString("es-CO")}
             </p>
           )}
 
-          <div className="product__controls">
-            <label className="product__field">
+          <div className="mt-3.5 flex flex-wrap gap-3.5">
+            <label className="grid gap-1.5">
               <span>Talla</span>
               <select
-                className="product__select"
+                className="rounded-[10px] border border-[rgba(42,36,30,0.14)] bg-transparent px-2.5 py-2"
                 value={size}
                 onChange={(e) => setSize(e.target.value)}
                 disabled={!sizes.length}
@@ -310,10 +310,10 @@ export default function ProductDetail() {
               </select>
             </label>
 
-            <label className="product__field">
+            <label className="grid gap-1.5">
               <span>Color</span>
               <select
-                className="product__select"
+                className="rounded-[10px] border border-[rgba(42,36,30,0.14)] bg-transparent px-2.5 py-2"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
                 disabled={!colors.length}
@@ -327,12 +327,12 @@ export default function ProductDetail() {
               </select>
             </label>
 
-            <div className="product__cta">
+            <div className="mt-4 w-full">
               <button className="btn btn--active" type="button" onClick={handleWhatsApp}>
                 Comprar por WhatsApp
               </button>
 
-              <p className="product__selected">
+              <p className="mt-3">
                 Seleccionado: <strong>{size || "--"}</strong> /{" "}
                 <strong>{color || "--"}</strong>
               </p>
@@ -342,17 +342,17 @@ export default function ProductDetail() {
       </div>
 
       {/* Descripción */}
-      <section className="product__desc">
-        <h2 className="section__title">Descripción</h2>
+      <section className="mt-[26px]">
+        <h2 className="[font-size:1.5em] font-bold [margin-block-end:0.83em] [margin-block-start:0.83em]">Descripción</h2>
         <p className="page__subtitle">{product.description}</p>
       </section>
 
       {/* Productos relacionados */}
-      <section className="product__related">
-        <h2 className="section__title">Productos relacionados</h2>
+      <section className="mt-[26px]">
+        <h2 className="[font-size:1.5em] font-bold [margin-block-end:0.83em] [margin-block-start:0.83em]">Productos relacionados</h2>
 
         {related.length ? (
-          <div className="product__relatedGrid">
+          <div className="mt-3 grid grid-cols-4 gap-3.5 max-[900px]:grid-cols-2">
             {related.map((p) => {
               const rid = p.id || p._id;
               const to = `/product/${rid}`;
@@ -367,23 +367,23 @@ export default function ProductDetail() {
                 "";
 
               return (
-                <Link key={rid} className="product__relatedCard" to={to}>
-                  <div className="product__relatedImgWrap">
+                <Link key={rid} className="overflow-hidden rounded-2xl border border-[rgba(42,36,30,0.14)] bg-white/[0.35] text-inherit no-underline shadow-[var(--shadow)]" to={to}>
+                  <div className="aspect-[4/5] bg-white/[0.35]">
                     {rImg ? (
                       <img
-                        className="product__relatedImg"
+                        className="block h-full w-full object-cover"
                         src={rImg}
                         alt={p.name}
                         loading="lazy"
                       />
                     ) : (
-                      <div className="product__relatedNoImg">Sin imagen</div>
+                      <div className="grid h-full w-full place-items-center text-[13px] opacity-70">Sin imagen</div>
                     )}
                   </div>
-                  <div className="product__relatedBody">
-                    <div className="product__relatedName">{p.name}</div>
+                  <div className="grid gap-1.5 p-2.5">
+                    <div className="font-semibold">{p.name}</div>
                     {p.price != null && (
-                      <div className="product__relatedPrice">
+                      <div className="text-sm opacity-85">
                         ${Number(p.price).toLocaleString("es-CO")}
                       </div>
                     )}
@@ -393,7 +393,7 @@ export default function ProductDetail() {
             })}
           </div>
         ) : (
-          <p className="product__relatedEmpty">
+          <p className="mt-2.5 opacity-70">
             Aún no hay relacionados para mostrar.
           </p>
         )}
