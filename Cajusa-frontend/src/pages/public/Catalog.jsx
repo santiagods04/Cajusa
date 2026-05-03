@@ -137,7 +137,7 @@ export default function Catalog() {
   }, [onProductsReload, requestParams]);
 
   const btnClass = (value) =>
-    `btn btn--ghost catalog__chip ${line === value ? "btn--active" : ""}`;
+    `btn btn--ghost rounded-full ${line === value ? "btn--active" : ""}`;
 
   const onSubmitSearch = (e) => {
     e.preventDefault();
@@ -152,29 +152,29 @@ export default function Catalog() {
 
   return (
     <div className="container">
-      <div className="catalog__top">
-        <div className="catalog__top-head">
+      <div className="mb-4">
+        <div className="flex items-baseline justify-between gap-3">
           <h1 className="page__title">Catálogo</h1>
-          <p className="catalog__meta">
+          <p className="m-0 text-[var(--muted)]">
             {products.length} producto{products.length === 1 ? "" : "s"}
           </p>
         </div>
 
-        <form className="catalog__search" onSubmit={onSubmitSearch}>
+        <form className="mt-2.5 flex flex-wrap gap-2.5" onSubmit={onSubmitSearch}>
           <input
-            className="catalog__search-input"
+            className="min-w-60 flex-1 rounded-xl border border-[rgba(42,36,30,0.14)] bg-white/75 px-3 py-2.5 text-[var(--text)] outline-none focus:border-[rgba(177,74,47,0.28)] focus:shadow-[0_0_0_3px_rgba(177,74,47,0.12)]"
             value={queryDraft}
             onChange={(e) => setQueryDraft(e.target.value)}
             placeholder="Buscar por nombre, categoría…"
             type="search"
           />
-          <button className="btn catalog__search-btn" type="submit">
+          <button className="btn rounded-xl bg-[rgba(177,74,47,0.10)]" type="submit">
             Buscar
           </button>
 
           {(query || queryDraft) && (
             <button
-              className="btn btn--ghost catalog__search-clear"
+              className="btn btn--ghost rounded-xl"
               type="button"
               onClick={clearSearch}
             >
@@ -184,15 +184,15 @@ export default function Catalog() {
         </form>
       </div>
 
-      <div className="catalog__layout">
+      <div className="grid grid-cols-[280px_1fr] items-start gap-4 max-[820px]:grid-cols-1">
         {/* Sidebar */}
-        <aside className="catalog__sidebar">
-          <div className="catalog__panel">
-            <div className="catalog__panel-head">
-              <h2 className="catalog__panel-title">Filtros</h2>
+        <aside>
+          <div className="rounded-[14px] border border-[rgba(42,36,30,0.14)] bg-white/[0.55] p-3.5 shadow-[var(--shadow)]">
+            <div className="mb-2.5 flex items-center justify-between gap-2.5">
+              <h2 className="m-0 [font-family:var(--font-title)] text-lg">Filtros</h2>
               {anySidebarFilter ? (
                 <button
-                  className="btn btn--ghost catalog__clear"
+                  className="btn btn--ghost rounded-xl px-2.5 py-2"
                   type="button"
                   onClick={clearSidebarFilters}
                 >
@@ -202,9 +202,9 @@ export default function Catalog() {
             </div>
 
             {/* Línea */}
-            <div className="catalog__section">
-              <div className="catalog__section-title">Línea</div>
-              <div className="catalog__chips-row">
+            <div className="mt-3 border-t border-[rgba(42,36,30,0.10)] pt-3">
+              <div className="mb-2.5 font-extrabold">Línea</div>
+              <div className="flex flex-wrap gap-2.5">
                 <button
                   className={btnClass("all")}
                   type="button"
@@ -230,13 +230,14 @@ export default function Catalog() {
             </div>
 
             {/* Categoría (siempre visible) */}
-            <div className="catalog__section">
-              <div className="catalog__section-title">Categoría</div>
+            <div className="mt-3 border-t border-[rgba(42,36,30,0.10)] pt-3">
+              <div className="mb-2.5 font-extrabold">Categoría</div>
               {facets.categories.length ? (
-                <div className="catalog__checks">
+                <div className="grid gap-2">
                   {facets.categories.map((c) => (
-                    <label key={c} className="catalog__check">
+                    <label key={c} className="flex items-center gap-2.5 text-[var(--text)]">
                       <input
+                        className="h-4 w-4 accent-[var(--accent)]"
                         type="checkbox"
                         checked={selectedCategories.has(c)}
                         onChange={() => toggleInSet(setSelectedCategories, c)}
@@ -246,18 +247,19 @@ export default function Catalog() {
                   ))}
                 </div>
               ) : (
-                <div className="catalog__hint">Sin opciones</div>
+                <div>Sin opciones</div>
               )}
             </div>
 
             {/* Subcategoría (siempre visible) */}
-            <div className="catalog__section">
-              <div className="catalog__section-title">Subcategoría</div>
+            <div className="mt-3 border-t border-[rgba(42,36,30,0.10)] pt-3">
+              <div className="mb-2.5 font-extrabold">Subcategoría</div>
               {facets.subcategories.length ? (
-                <div className="catalog__checks">
+                <div className="grid gap-2">
                   {facets.subcategories.map((s) => (
-                    <label key={s} className="catalog__check">
+                    <label key={s} className="flex items-center gap-2.5 text-[var(--text)]">
                       <input
+                        className="h-4 w-4 accent-[var(--accent)]"
                         type="checkbox"
                         checked={selectedSubcategories.has(s)}
                         onChange={() => toggleInSet(setSelectedSubcategories, s)}
@@ -267,20 +269,20 @@ export default function Catalog() {
                   ))}
                 </div>
               ) : (
-                <div className="catalog__hint">Sin opciones</div>
+                <div>Sin opciones</div>
               )}
             </div>
 
             {/* Talla (siempre visible, single) */}
-            <div className="catalog__section">
-              <div className="catalog__section-title">Talla</div>
+            <div className="mt-3 border-t border-[rgba(42,36,30,0.10)] pt-3">
+              <div className="mb-2.5 font-extrabold">Talla</div>
               {facets.sizes.length ? (
-                <div className="catalog__chips-wrap">
+                <div className="flex flex-wrap gap-2.5">
                   {facets.sizes.map((s) => (
                     <button
                       key={s}
                       type="button"
-                      className={`btn btn--ghost catalog__chip ${selectedSize === s ? "btn--active" : ""
+                      className={`btn btn--ghost rounded-full ${selectedSize === s ? "btn--active" : ""
                         }`}
                       onClick={() => toggleSingle(setSelectedSize, s)}
                     >
@@ -289,20 +291,20 @@ export default function Catalog() {
                   ))}
                 </div>
               ) : (
-                <div className="catalog__hint">Sin opciones</div>
+                <div>Sin opciones</div>
               )}
             </div>
 
             {/* Color (siempre visible, single) */}
-            <div className="catalog__section">
-              <div className="catalog__section-title">Color</div>
+            <div className="mt-3 border-t border-[rgba(42,36,30,0.10)] pt-3">
+              <div className="mb-2.5 font-extrabold">Color</div>
               {facets.colors.length ? (
-                <div className="catalog__chips-wrap">
+                <div className="flex flex-wrap gap-2.5">
                   {facets.colors.map((c) => (
                     <button
                       key={c}
                       type="button"
-                      className={`btn btn--ghost catalog__chip ${selectedColor === c ? "btn--active" : ""
+                      className={`btn btn--ghost rounded-full ${selectedColor === c ? "btn--active" : ""
                         }`}
                       onClick={() => toggleSingle(setSelectedColor, c)}
                     >
@@ -311,14 +313,14 @@ export default function Catalog() {
                   ))}
                 </div>
               ) : (
-                <div className="catalog__hint">Sin opciones</div>
+                <div>Sin opciones</div>
               )}
             </div>
           </div>
         </aside>
 
         {/* Content */}
-        <section className="catalog__content">
+        <section>
           {productsError ? (
             <div className="state">Error: {productsError}</div>
           ) : productsLoading ? (
@@ -326,14 +328,14 @@ export default function Catalog() {
           ) : (
             <>
               {products.length === 0 ? (
-                <div className="catalog__empty">
-                  <h3 className="catalog__empty-title">No encontramos resultados</h3>
-                  <p className="catalog__empty-text">
+                <div className="rounded-[14px] border border-[rgba(42,36,30,0.14)] bg-white/[0.55] p-4">
+                  <h3 className="m-0 mb-1.5 [font-family:var(--font-title)]">No encontramos resultados</h3>
+                  <p className="m-0 text-[var(--muted)]">
                     Prueba con otra búsqueda o limpia filtros.
                   </p>
                 </div>
               ) : (
-                <div className="catalog__grid">
+                <div className="grid grid-cols-3 gap-3.5 max-[1100px]:grid-cols-2 max-[820px]:grid-cols-1">
                   {products.map((p) => {
                     const id = p?._id || p?.id;
                     const img = Array.isArray(p?.images) ? p.images[0] : null;
@@ -350,45 +352,50 @@ export default function Catalog() {
                     return (
                       <Link
                         key={id}
-                        className="catalog__card"
+                        className="overflow-hidden rounded-2xl border border-[rgba(42,36,30,0.14)] bg-white/[0.65] shadow-[var(--shadow)] [transition:transform_0.08s_ease,box-shadow_0.2s_ease] hover:-translate-y-px hover:shadow-[0_18px_44px_rgba(42,36,30,0.12)]"
                         to={id ? `/product/${id}` : "/catalog"}
                       >
                         <div
-                          className={`catalog__media ${img ? "" : "catalog__media--placeholder"
+                          className={`relative isolate aspect-[4/5] w-full overflow-hidden rounded-t-[14px] max-[820px]:h-[180px] ${img ? "" : "[background:radial-gradient(500px_240px_at_20%_20%,rgba(177,74,47,0.14),transparent_55%),radial-gradient(500px_240px_at_80%_10%,rgba(47,111,94,0.12),transparent_60%),rgba(255,255,255,0.55)]"
                             }`}
                         >
                           {img ? (
                             <img
-                              className="catalog__img"
+                              className="block h-full w-full object-cover object-[center_20%]"
                               src={img}
                               alt={p?.name || "Producto"}
                               loading="lazy"
                             />
                           ) : (
-                            <div className="catalog__placeholder">
+                            <div className="grid h-full place-items-center [font-family:var(--font-title)] text-[40px] text-[rgba(42,36,30,0.40)]">
                               {(p?.name || "C").slice(0, 1).toUpperCase()}
                             </div>
                           )}
 
                           {badgeText ? (
-                            <span className={`catalog__badge catalog__badge--${lineKey}`}>
+                            <span className={`absolute left-3.5 top-3.5 z-[3] rounded-full border px-2.5 py-1.5 text-[12px] font-extrabold tracking-[0.2px] text-[rgba(42,36,30,0.95)] opacity-100 shadow-[0_10px_22px_rgba(42,36,30,0.22),inset_0_1px_0_rgba(255,255,255,0.75)] [backdrop-filter:none] [mix-blend-mode:normal] before:mr-2 before:inline-block before:h-2 before:w-2 before:rounded-full before:bg-[var(--accent)] before:outline before:outline-2 before:outline-[rgba(42,36,30,0.12)] before:content-[''] ${lineKey === "antifluido"
+                                ? "border-[rgba(47,111,94,0.45)] bg-[#E3E6DD] before:bg-[rgba(47,111,94,1)]"
+                                : lineKey === "lino"
+                                  ? "border-[rgba(177,74,47,0.45)] bg-[#F2E1D7] before:bg-[rgba(177,74,47,1)]"
+                                  : "border-[rgba(42,36,30,0.22)] bg-[#fbf6ee]"
+                              }`}>
                               {badgeText}
                             </span>
                           ) : null}
                         </div>
 
-                        <div className="catalog__card-body">
-                          <h3 className="catalog__card-title">{p?.name}</h3>
-                          <p className="catalog__card-sub">{p?.category}</p>
+                        <div className="px-3 pb-3.5 pt-3">
+                          <h3 className="m-0 mb-1.5 text-base leading-[1.2]">{p?.name}</h3>
+                          <p className="m-0 mb-3 text-[13px] text-[var(--muted)]">{p?.category}</p>
 
-                          <div className="catalog__card-row">
+                          <div className="flex items-center justify-between gap-2.5">
                             <span
-                              className={`catalog__price ${price ? "" : "catalog__price--na"
+                              className={`${price ? "font-black" : "font-bold text-[var(--muted)]"
                                 }`}
                             >
                               {price || "Precio por WhatsApp"}
                             </span>
-                            <span className="catalog__cta">Ver →</span>
+                            <span className="font-extrabold text-[rgba(42,36,30,0.70)]">Ver →</span>
                           </div>
                         </div>
                       </Link>
